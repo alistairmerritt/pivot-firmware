@@ -4,6 +4,17 @@ ESPHome firmware for the Home Assistant Voice Preview Edition (VPE) that turns i
 
 > **New to Pivot?** Start at the [Pivot documentation site](https://alistairmerritt.github.io/pivot) for a full getting started guide, integration setup, and troubleshooting.
 
+## Repository structure
+
+| File | What it is | Do you use it directly? |
+| --- | --- | --- |
+| `home-assistant-voice.yaml` | The full shared firmware source | **No** — ESPHome fetches this automatically |
+| `devices/example.yaml` | Minimal per-device config template | **Yes** — copy this into ESPHome for each device |
+
+**You never need to open or copy `home-assistant-voice.yaml`.** It lives here on GitHub and is pulled automatically when ESPHome compiles your device. The only file you work with is `devices/example.yaml`.
+
+---
+
 ## What is Pivot firmware?
 
 Pivot firmware extends the stock VPE firmware with four colour-coded control banks. Each bank can be assigned to a Home Assistant entity — turn the knob to adjust it, press the button to toggle it. The LED ring shows the active bank colour and control values in real time.
@@ -18,27 +29,50 @@ Pivot firmware works alongside the [Pivot HA integration](https://github.com/ali
 
 ## Quick start
 
-1. Copy `devices/example.yaml` into your ESPHome dashboard as a new device
-2. Fill in the substitutions (device name, suffix, WiFi, API key)
+1. **Copy `devices/example.yaml`** into your ESPHome dashboard as a new device
+2. Fill in your device-specific values (name, suffix, WiFi, API key)
 3. Click **Install → Wirelessly** — or via USB for the very first flash
 4. Add the device to Home Assistant via the ESPHome integration
 5. Install the [Pivot HA integration](https://github.com/alistairmerritt/pivot-integration) and add your device
 
-The example file uses ESPHome's `packages:` feature to pull the full firmware from GitHub automatically — you only maintain the handful of lines unique to your device. When a new version of Pivot firmware is released, just hit **Install** in ESPHome and it pulls the latest.
+ESPHome fetches `home-assistant-voice.yaml` from GitHub automatically at compile time — you don't need to touch it. When a new version of Pivot firmware is released, just hit **Install** in ESPHome and it pulls the latest.
 
-## Per-device configuration
+## Per-device configuration (`devices/example.yaml`)
 
-Each device needs only these values. Everything else comes from the shared firmware:
+This is everything you need per device. Fill in your values and paste it into ESPHome:
 
 ```yaml
 substitutions:
-  device_name: home_assistant_voice_lounge      # ESPHome slug — no spaces or dashes
-  device_friendly_name: Lounge VPE             # Display name in HA and ESPHome
-  device_suffix: ha_voice_lounge               # Unique per device — must match Pivot integration
-  wifi_ssid: !secret wifi_ssid                 # From secrets.yaml (recommended)
+  # =======================================================================
+  # PIVOT DEVICE CONFIGURATION — fill in these values for each device
+  # =======================================================================
+
+  # ESPHome device name (slug, no spaces or dashes)
+  device_name: home_assistant_voice_lounge
+
+  # Friendly name shown in HA and ESPHome
+  device_friendly_name: Lounge VPE
+
+  # Pivot device suffix — unique per device, no spaces or dashes
+  # Must match exactly what you enter in the Pivot integration
+  device_suffix: ha_voice_lounge
+
+  # WiFi credentials — add these lines to your ESPHome secrets.yaml:
+  #   wifi_ssid: "Your Network Name"
+  #   wifi_password: "Your Password"
+  wifi_ssid: !secret wifi_ssid
   wifi_password: !secret wifi_password
-  api_encryption_key: "generate-unique-per-device"
-  led_offset: '6'                              # '6' = flat, '0' = upright on stand
+
+  # API encryption key — generate a unique one per device at:
+  # https://esphome.io/components/api.html#configuration-variables
+  api_encryption_key: "generate-a-unique-key-here"
+
+  # LED orientation — set based on how your device is mounted:
+  #   '6'  flat on a surface, cable facing away (LEDs start at bottom)
+  #   '0'  upright on a stand, cable at the bottom (LEDs start at top)
+  led_offset: '6'
+
+  # =======================================================================
 
 packages:
   pivot:
@@ -48,13 +82,11 @@ packages:
     refresh: 1d
 ```
 
-See `devices/example.yaml` for the full annotated template.
-
 The `device_suffix` must be unique for each device and must match exactly what you enter when setting up the Pivot integration in Home Assistant.
 
 ## Multiple devices
 
-Each VPE gets its own minimal config file in ESPHome with a unique `device_suffix`. The shared firmware is pulled from GitHub automatically — no copying or maintaining separate full YAML files per device.
+Each VPE gets its own copy of `devices/example.yaml` in ESPHome with a unique `device_suffix`. The shared firmware is pulled from GitHub automatically — no copying or maintaining separate full YAML files per device.
 
 | Device | `device_suffix` |
 | --- | --- |
