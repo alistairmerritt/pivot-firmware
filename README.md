@@ -13,47 +13,48 @@ Pivot firmware works alongside the [Pivot HA integration](https://github.com/ali
 ## Requirements
 
 - Home Assistant Voice Preview Edition (VPE)
-- ESPHome installed (via the ESPHome add-on or ESPHome dashboard)
+- ESPHome installed (via the ESPHome Device Builder add-on)
 - The [Pivot HA integration](https://github.com/alistairmerritt/pivot-integration) installed in Home Assistant
 
 ## Quick start
 
-1. Download `home-assistant-voice.yaml` from this repository
-2. Open it and fill in the substitutions block at the top (see below)
-3. Flash it to your VPE via the ESPHome dashboard or `esphome run`
+1. Copy `devices/example.yaml` into your ESPHome dashboard as a new device
+2. Fill in the substitutions (device name, suffix, WiFi, API key)
+3. Click **Install → Wirelessly** — or via USB for the very first flash
 4. Add the device to Home Assistant via the ESPHome integration
 5. Install the [Pivot HA integration](https://github.com/alistairmerritt/pivot-integration) and add your device
 
-## Substitutions block
+The example file uses ESPHome's `packages:` feature to pull the full firmware from GitHub automatically — you only maintain the handful of lines unique to your device. When a new version of Pivot firmware is released, just hit **Install** in ESPHome and it pulls the latest.
 
-All device-specific configuration is at the top of the YAML file. You only need to edit this section:
+## Per-device configuration
+
+Each device needs only these values. Everything else comes from the shared firmware:
 
 ```yaml
 substitutions:
-  # ESPHome device name (slug, no spaces) — shown in ESPHome dashboard
-  device_name: home_assistant_voice_lounge
+  device_name: home_assistant_voice_lounge      # ESPHome slug — no spaces or dashes
+  device_friendly_name: Lounge VPE             # Display name in HA and ESPHome
+  device_suffix: ha_voice_lounge               # Unique per device — must match Pivot integration
+  wifi_ssid: !secret wifi_ssid                 # From secrets.yaml (recommended)
+  wifi_password: !secret wifi_password
+  api_encryption_key: "generate-unique-per-device"
+  led_offset: '6'                              # '6' = flat, '0' = upright on stand
 
-  # Friendly name — shown in Home Assistant and ESPHome UI
-  device_friendly_name: Lounge VPE
-
-  # Pivot device suffix — must be unique per device, no spaces or dashes.
-  # Must match exactly what you enter in the Pivot integration setup.
-  device_suffix: ha_voice_lounge
-
-  # WiFi credentials
-  wifi_ssid: "YourWiFiName"
-  wifi_password: "YourWiFiPassword"
-
-  # API encryption key — generate a new one per device at:
-  # https://esphome.io/components/api.html#configuration-variables
-  api_encryption_key: "your_generated_key_here"
+packages:
+  pivot:
+    url: https://github.com/alistairmerritt/pivot-firmware
+    ref: main
+    file: home-assistant-voice.yaml
+    refresh: 1d
 ```
 
-The `device_suffix` value must be unique for each device and must match exactly what you enter when setting up the Pivot integration in Home Assistant.
+See `devices/example.yaml` for the full annotated template.
+
+The `device_suffix` must be unique for each device and must match exactly what you enter when setting up the Pivot integration in Home Assistant.
 
 ## Multiple devices
 
-Flash a separate copy of the firmware for each VPE, with a unique `device_suffix` for each. For example:
+Each VPE gets its own minimal config file in ESPHome with a unique `device_suffix`. The shared firmware is pulled from GitHub automatically — no copying or maintaining separate full YAML files per device.
 
 | Device | `device_suffix` |
 | --- | --- |

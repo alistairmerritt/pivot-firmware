@@ -534,6 +534,7 @@ binary_sensor:
               condition:
                 lambda: return !id(init_in_progress) && !id(color_changed) && !id(group_volume_changed) && !id(dial_touched);
               then:
+                - lambda: id(button_press_event).trigger("single_press");
                 - if:
                     condition:
                       switch.is_on: timer_ringing
@@ -1605,6 +1606,7 @@ event:
     icon: mdi:button-pointer
     device_class: button
     event_types:
+      - single_press
       - double_press
       - triple_press
       - long_press
