@@ -2,41 +2,30 @@
 # Pivot — per-device configuration
 # ============================================================
 #
-# This file contains only the values unique to this device.
-# Everything else (voice assistant, LED logic, bank control,
-# event firing, etc.) is pulled automatically from the shared
-# Pivot firmware on GitHub via the packages block at the bottom.
+# This is the ONLY file you need per device. Fill in the
+# substitutions below, then click Install in ESPHome —
+# the full firmware is pulled from GitHub automatically.
 #
-# SETUP
-#   1. Copy this file into your ESPHome dashboard as a new device
-#   2. Fill in the substitutions below for your device
-#   3. Add wifi_ssid / wifi_password to your secrets.yaml, or
-#      paste your credentials directly into the fields below
-#   4. Click Install → Wirelessly (OTA) or flash via USB
-#
-# UPDATES
-#   When a new version of Pivot firmware is released, just open
-#   the device in ESPHome and click Install. ESPHome will pull
-#   the latest firmware from GitHub automatically.
-#
+# UPDATES: when a new Pivot firmware version is released,
+# just open the device in ESPHome and click Install. Done.
 # ============================================================
 
 substitutions:
-  # ESPHome device name — lowercase slug, no spaces or dashes.
-  # This becomes the device's hostname on your network.
+  # =======================================================================
+  # PIVOT DEVICE CONFIGURATION — fill in these values for each device
+  # =======================================================================
+
+  # ESPHome device name (slug, no spaces or dashes)
   device_name: home_assistant_voice_lounge
 
-  # Friendly name shown in Home Assistant and the ESPHome dashboard.
+  # Friendly name shown in HA and ESPHome
   device_friendly_name: Lounge VPE
 
-  # Pivot device suffix — must be unique per device, lowercase,
-  # no spaces or dashes. Must match exactly what you enter in
-  # the Pivot integration setup in Home Assistant.
-  #   e.g. ha_voice_lounge → number.ha_voice_lounge_active_bank
+  # Pivot device suffix — unique per device, no spaces or dashes
+  # Must match exactly what you enter in the Pivot integration
   device_suffix: ha_voice_lounge
 
-  # WiFi credentials.
-  # Using !secret is recommended — add these lines to secrets.yaml:
+  # WiFi credentials — add these lines to your ESPHome secrets.yaml:
   #   wifi_ssid: "Your Network Name"
   #   wifi_password: "Your Password"
   wifi_ssid: !secret wifi_ssid
@@ -46,18 +35,13 @@ substitutions:
   # https://esphome.io/components/api.html#configuration-variables
   api_encryption_key: "generate-a-unique-key-here"
 
-  # LED orientation — controls which physical LED is position 0
-  # on the ring so gauges appear in the right place.
-  #   '6'  flat on a surface, cable facing away (default)
-  #   '0'  upright on a stand, cable at the bottom
+  # LED orientation — set based on how your device is mounted:
+  #   '6'  flat on a surface, cable facing away (LEDs start at bottom)
+  #   '0'  upright on a stand, cable at the bottom (LEDs start at top)
   led_offset: '6'
 
-# ============================================================
-# Pull the full Pivot firmware from GitHub.
-# ESPHome re-checks for updates on each compile (refresh: 1d).
-# Do not add anything below this block — all configuration
-# comes from the shared firmware file.
-# ============================================================
+  # =======================================================================
+
 packages:
   pivot:
     url: https://github.com/alistairmerritt/pivot-firmware
