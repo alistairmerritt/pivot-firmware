@@ -47,4 +47,4 @@ packages:
     url: https://github.com/alistairmerritt/pivot-firmware
     ref: main
     file: home-assistant-voice.yaml
-    refresh: 1d
+    refresh: 0s
