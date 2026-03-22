@@ -615,11 +615,13 @@ binary_sensor:
               condition:
                 lambda: return !id(init_in_progress) && !id(color_changed) && !id(group_volume_changed);
               then:
+                - lambda: id(control_mode) = !id(control_mode);
+                - script.execute: set_mode_led_color
                 - script.execute:
                     id: play_sound
                     priority: false
                     sound_file: "center_button_double_press_sound"
-                - lambda: id(control_mode) = !id(control_mode);
+                - delay: 1200ms
                 - if:
                     condition:
                       lambda: return id(control_mode);
@@ -633,7 +635,6 @@ binary_sensor:
                           action: switch.turn_off
                           data:
                             entity_id: switch.${device_suffix}_control_mode
-                - script.execute: set_mode_led_color
                 - lambda: id(button_press_event).trigger("double_press");
       # Triple Click
       #  . Exposed as an event entity. To be used in automations inside Home Assistant
@@ -649,14 +650,6 @@ binary_sensor:
               condition:
                 lambda: return !id(init_in_progress) && !id(color_changed) && !id(group_volume_changed);
               then:
-                - if:
-                    condition:
-                      lambda: return !id(control_mode);
-                    then:
-                      - script.execute:
-                          id: play_sound
-                          priority: false
-                          sound_file: "center_button_triple_press_sound"
                 - lambda: id(button_press_event).trigger("triple_press");
       # Long Press (1s+)
       #  . Exposed as an event entity. To be used in automations inside Home Assistant
