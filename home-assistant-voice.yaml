@@ -149,8 +149,6 @@ api:
         id(bank_passive_1) = id(ha_bank_passive_1).state;
         id(bank_passive_2) = id(ha_bank_passive_2).state;
         id(bank_passive_3) = id(ha_bank_passive_3).state;
-        id(ha_initialized) = false;
-    - script.execute: mark_ha_initialized
   on_client_disconnected:
     - script.execute: control_leds
   encryption:
@@ -338,14 +336,6 @@ globals:
     type: int
     restore_value: yes
     initial_value: '255'
-
-  # Set to true 5 seconds after HA connects — suppresses configured-colour
-  # backup updates during the startup entity push to avoid saving the
-  # mirror (light) colour over the user's configured bank colour.
-  - id: ha_initialized
-    type: bool
-    restore_value: no
-    initial_value: 'false'
 
   # Per-bank mirror light flag — true = mirror assigned RGB light colour
   - id: bank_mirror_0
@@ -904,7 +894,9 @@ binary_sensor:
             id(control_leds).execute();
 
 text_sensor:
-  # Sync bank colours from Pivot integration (hex string e.g. #2889FF)
+  # Sync bank display colours from Pivot integration (hex string e.g. #2889FF).
+  # When mirror is on this holds the assigned light's colour; when mirror is off
+  # it holds the user's configured colour.  The LED ring always uses bank_r/g/b_N.
   - platform: homeassistant
     id: ha_bank_color_0
     entity_id: text.${device_suffix}_bank_0_color
@@ -922,13 +914,9 @@ text_sensor:
               int r = (hval(hex[1]) << 4) | hval(hex[2]);
               int g = (hval(hex[3]) << 4) | hval(hex[4]);
               int b = (hval(hex[5]) << 4) | hval(hex[6]);
-              // Update the active bank colour globals
               id(bank_r_0) = r;
               id(bank_g_0) = g;
               id(bank_b_0) = b;
-              // Schedule a delayed backup update — the mirror switch state may
-              // not have arrived yet, so we wait 500 ms and check then.
-              id(update_configured_colour_0).execute();
               id(control_leds).execute();
             }
   - platform: homeassistant
@@ -948,11 +936,9 @@ text_sensor:
               int r = (hval(hex[1]) << 4) | hval(hex[2]);
               int g = (hval(hex[3]) << 4) | hval(hex[4]);
               int b = (hval(hex[5]) << 4) | hval(hex[6]);
-              // Update the active bank colour globals
               id(bank_r_1) = r;
               id(bank_g_1) = g;
               id(bank_b_1) = b;
-              id(update_configured_colour_1).execute();
               id(control_leds).execute();
             }
   - platform: homeassistant
@@ -972,11 +958,9 @@ text_sensor:
               int r = (hval(hex[1]) << 4) | hval(hex[2]);
               int g = (hval(hex[3]) << 4) | hval(hex[4]);
               int b = (hval(hex[5]) << 4) | hval(hex[6]);
-              // Update the active bank colour globals
               id(bank_r_2) = r;
               id(bank_g_2) = g;
               id(bank_b_2) = b;
-              id(update_configured_colour_2).execute();
               id(control_leds).execute();
             }
   - platform: homeassistant
@@ -996,12 +980,87 @@ text_sensor:
               int r = (hval(hex[1]) << 4) | hval(hex[2]);
               int g = (hval(hex[3]) << 4) | hval(hex[4]);
               int b = (hval(hex[5]) << 4) | hval(hex[6]);
-              // Update the active bank colour globals
               id(bank_r_3) = r;
               id(bank_g_3) = g;
               id(bank_b_3) = b;
-              id(update_configured_colour_3).execute();
               id(control_leds).execute();
+            }
+  # Sync user's configured bank colours — never overwritten by mirror.
+  # Written by the integration's colour picker light; always reflects the
+  # user's chosen colour regardless of mirror state.  Stored directly into
+  # bank_mirror_r/g/b_N so the Bank Indicator always shows the correct
+  # identity colour (Blue/Orange/Green/Purple or custom) during bank switching.
+  - platform: homeassistant
+    id: ha_bank_configured_color_0
+    entity_id: text.${device_suffix}_bank_0_configured_color
+    on_value:
+      then:
+      - lambda: |
+            std::string hex = x;
+            if (hex.size() == 7 && hex[0] == '#') {
+              auto hval = [](char c) -> int {
+                if (c >= '0' && c <= '9') return c - '0';
+                if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+                if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+                return 0;
+              };
+              id(bank_mirror_r_0) = (hval(hex[1]) << 4) | hval(hex[2]);
+              id(bank_mirror_g_0) = (hval(hex[3]) << 4) | hval(hex[4]);
+              id(bank_mirror_b_0) = (hval(hex[5]) << 4) | hval(hex[6]);
+            }
+  - platform: homeassistant
+    id: ha_bank_configured_color_1
+    entity_id: text.${device_suffix}_bank_1_configured_color
+    on_value:
+      then:
+      - lambda: |
+            std::string hex = x;
+            if (hex.size() == 7 && hex[0] == '#') {
+              auto hval = [](char c) -> int {
+                if (c >= '0' && c <= '9') return c - '0';
+                if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+                if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+                return 0;
+              };
+              id(bank_mirror_r_1) = (hval(hex[1]) << 4) | hval(hex[2]);
+              id(bank_mirror_g_1) = (hval(hex[3]) << 4) | hval(hex[4]);
+              id(bank_mirror_b_1) = (hval(hex[5]) << 4) | hval(hex[6]);
+            }
+  - platform: homeassistant
+    id: ha_bank_configured_color_2
+    entity_id: text.${device_suffix}_bank_2_configured_color
+    on_value:
+      then:
+      - lambda: |
+            std::string hex = x;
+            if (hex.size() == 7 && hex[0] == '#') {
+              auto hval = [](char c) -> int {
+                if (c >= '0' && c <= '9') return c - '0';
+                if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+                if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+                return 0;
+              };
+              id(bank_mirror_r_2) = (hval(hex[1]) << 4) | hval(hex[2]);
+              id(bank_mirror_g_2) = (hval(hex[3]) << 4) | hval(hex[4]);
+              id(bank_mirror_b_2) = (hval(hex[5]) << 4) | hval(hex[6]);
+            }
+  - platform: homeassistant
+    id: ha_bank_configured_color_3
+    entity_id: text.${device_suffix}_bank_3_configured_color
+    on_value:
+      then:
+      - lambda: |
+            std::string hex = x;
+            if (hex.size() == 7 && hex[0] == '#') {
+              auto hval = [](char c) -> int {
+                if (c >= '0' && c <= '9') return c - '0';
+                if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+                if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+                return 0;
+              };
+              id(bank_mirror_r_3) = (hval(hex[1]) << 4) | hval(hex[2]);
+              id(bank_mirror_g_3) = (hval(hex[3]) << 4) | hval(hex[4]);
+              id(bank_mirror_b_3) = (hval(hex[5]) << 4) | hval(hex[6]);
             }
 
 
@@ -1648,61 +1707,6 @@ event:
       - easter_egg_press
 
 script:
-  # Wait 5 seconds after HA connects before allowing configured-colour backup
-  # updates. This prevents the startup entity-state push (which includes the
-  # mirror/light colour) from overwriting the stored configured bank colour.
-  - id: mark_ha_initialized
-    mode: restart
-    then:
-      - delay: 5s
-      - lambda: id(ha_initialized) = true;
-
-  # Delayed configured-colour backup scripts — called from ha_bank_color_N after
-  # every colour update. The 500 ms delay ensures the mirror switch state has
-  # arrived before we decide whether to save the colour as the "configured"
-  # (knob-active) colour. mode:restart means rapid successive colour updates
-  # collapse into a single save.
-  - id: update_configured_colour_0
-    mode: restart
-    then:
-      - delay: 500ms
-      - lambda: |
-          if (!id(bank_mirror_0) && id(ha_initialized)) {
-            id(bank_mirror_r_0) = id(bank_r_0);
-            id(bank_mirror_g_0) = id(bank_g_0);
-            id(bank_mirror_b_0) = id(bank_b_0);
-          }
-  - id: update_configured_colour_1
-    mode: restart
-    then:
-      - delay: 500ms
-      - lambda: |
-          if (!id(bank_mirror_1) && id(ha_initialized)) {
-            id(bank_mirror_r_1) = id(bank_r_1);
-            id(bank_mirror_g_1) = id(bank_g_1);
-            id(bank_mirror_b_1) = id(bank_b_1);
-          }
-  - id: update_configured_colour_2
-    mode: restart
-    then:
-      - delay: 500ms
-      - lambda: |
-          if (!id(bank_mirror_2) && id(ha_initialized)) {
-            id(bank_mirror_r_2) = id(bank_r_2);
-            id(bank_mirror_g_2) = id(bank_g_2);
-            id(bank_mirror_b_2) = id(bank_b_2);
-          }
-  - id: update_configured_colour_3
-    mode: restart
-    then:
-      - delay: 500ms
-      - lambda: |
-          if (!id(bank_mirror_3) && id(ha_initialized)) {
-            id(bank_mirror_r_3) = id(bank_r_3);
-            id(bank_mirror_g_3) = id(bank_g_3);
-            id(bank_mirror_b_3) = id(bank_b_3);
-          }
-
   # Stub for set_mode_led_color (called on HA client connect; in control mode sets LEDs to white gauge,
   # in listening mode resets to idle blue. Full rendering is handled by control_leds.)
   - id: set_mode_led_color
