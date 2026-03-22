@@ -883,11 +883,6 @@ binary_sensor:
     on_state:
       then:
         - lambda: |
-            if (x && !id(bank_mirror_0) && id(ha_initialized)) {
-              id(bank_mirror_r_0) = id(bank_r_0);
-              id(bank_mirror_g_0) = id(bank_g_0);
-              id(bank_mirror_b_0) = id(bank_b_0);
-            }
             id(bank_mirror_0) = x;
             id(control_leds).execute();
   - platform: homeassistant
@@ -896,11 +891,6 @@ binary_sensor:
     on_state:
       then:
         - lambda: |
-            if (x && !id(bank_mirror_1) && id(ha_initialized)) {
-              id(bank_mirror_r_1) = id(bank_r_1);
-              id(bank_mirror_g_1) = id(bank_g_1);
-              id(bank_mirror_b_1) = id(bank_b_1);
-            }
             id(bank_mirror_1) = x;
             id(control_leds).execute();
   - platform: homeassistant
@@ -909,11 +899,6 @@ binary_sensor:
     on_state:
       then:
         - lambda: |
-            if (x && !id(bank_mirror_2) && id(ha_initialized)) {
-              id(bank_mirror_r_2) = id(bank_r_2);
-              id(bank_mirror_g_2) = id(bank_g_2);
-              id(bank_mirror_b_2) = id(bank_b_2);
-            }
             id(bank_mirror_2) = x;
             id(control_leds).execute();
   - platform: homeassistant
@@ -922,11 +907,6 @@ binary_sensor:
     on_state:
       then:
         - lambda: |
-            if (x && !id(bank_mirror_3) && id(ha_initialized)) {
-              id(bank_mirror_r_3) = id(bank_r_3);
-              id(bank_mirror_g_3) = id(bank_g_3);
-              id(bank_mirror_b_3) = id(bank_b_3);
-            }
             id(bank_mirror_3) = x;
             id(control_leds).execute();
 
@@ -953,13 +933,9 @@ text_sensor:
               id(bank_r_0) = r;
               id(bank_g_0) = g;
               id(bank_b_0) = b;
-              // If mirror is off and startup push is complete, this is the
-              // user's chosen colour — save it as the configured colour backup.
-              if (!id(bank_mirror_0) && id(ha_initialized)) {
-                id(bank_mirror_r_0) = r;
-                id(bank_mirror_g_0) = g;
-                id(bank_mirror_b_0) = b;
-              }
+              // Schedule a delayed backup update — the mirror switch state may
+              // not have arrived yet, so we wait 500 ms and check then.
+              id(update_configured_colour_0).execute();
               id(control_leds).execute();
             }
   - platform: homeassistant
@@ -983,11 +959,7 @@ text_sensor:
               id(bank_r_1) = r;
               id(bank_g_1) = g;
               id(bank_b_1) = b;
-              if (!id(bank_mirror_1) && id(ha_initialized)) {
-                id(bank_mirror_r_1) = r;
-                id(bank_mirror_g_1) = g;
-                id(bank_mirror_b_1) = b;
-              }
+              id(update_configured_colour_1).execute();
               id(control_leds).execute();
             }
   - platform: homeassistant
@@ -1011,11 +983,7 @@ text_sensor:
               id(bank_r_2) = r;
               id(bank_g_2) = g;
               id(bank_b_2) = b;
-              if (!id(bank_mirror_2) && id(ha_initialized)) {
-                id(bank_mirror_r_2) = r;
-                id(bank_mirror_g_2) = g;
-                id(bank_mirror_b_2) = b;
-              }
+              id(update_configured_colour_2).execute();
               id(control_leds).execute();
             }
   - platform: homeassistant
@@ -1039,11 +1007,7 @@ text_sensor:
               id(bank_r_3) = r;
               id(bank_g_3) = g;
               id(bank_b_3) = b;
-              if (!id(bank_mirror_3) && id(ha_initialized)) {
-                id(bank_mirror_r_3) = r;
-                id(bank_mirror_g_3) = g;
-                id(bank_mirror_b_3) = b;
-              }
+              id(update_configured_colour_3).execute();
               id(control_leds).execute();
             }
 
@@ -1706,6 +1670,52 @@ script:
     then:
       - delay: 5s
       - lambda: id(ha_initialized) = true;
+
+  # Delayed configured-colour backup scripts — called from ha_bank_color_N after
+  # every colour update. The 500 ms delay ensures the mirror switch state has
+  # arrived before we decide whether to save the colour as the "configured"
+  # (knob-active) colour. mode:restart means rapid successive colour updates
+  # collapse into a single save.
+  - id: update_configured_colour_0
+    mode: restart
+    then:
+      - delay: 500ms
+      - lambda: |
+          if (!id(bank_mirror_0) && id(ha_initialized)) {
+            id(bank_mirror_r_0) = id(bank_r_0);
+            id(bank_mirror_g_0) = id(bank_g_0);
+            id(bank_mirror_b_0) = id(bank_b_0);
+          }
+  - id: update_configured_colour_1
+    mode: restart
+    then:
+      - delay: 500ms
+      - lambda: |
+          if (!id(bank_mirror_1) && id(ha_initialized)) {
+            id(bank_mirror_r_1) = id(bank_r_1);
+            id(bank_mirror_g_1) = id(bank_g_1);
+            id(bank_mirror_b_1) = id(bank_b_1);
+          }
+  - id: update_configured_colour_2
+    mode: restart
+    then:
+      - delay: 500ms
+      - lambda: |
+          if (!id(bank_mirror_2) && id(ha_initialized)) {
+            id(bank_mirror_r_2) = id(bank_r_2);
+            id(bank_mirror_g_2) = id(bank_g_2);
+            id(bank_mirror_b_2) = id(bank_b_2);
+          }
+  - id: update_configured_colour_3
+    mode: restart
+    then:
+      - delay: 500ms
+      - lambda: |
+          if (!id(bank_mirror_3) && id(ha_initialized)) {
+            id(bank_mirror_r_3) = id(bank_r_3);
+            id(bank_mirror_g_3) = id(bank_g_3);
+            id(bank_mirror_b_3) = id(bank_b_3);
+          }
 
   # Stub for set_mode_led_color (called on HA client connect; in control mode sets LEDs to white gauge,
   # in listening mode resets to idle blue. Full rendering is handled by control_leds.)
