@@ -1213,35 +1213,25 @@ light:
           update_interval: 50ms
           lambda: |-
             // Per-bank coloured gauge showing active bank value (0-100) across 12 LEDs.
-            // While the knob is actively being turned (bank_updating) and mirror is on,
-            // use the saved configured colour (bank_mirror_r/g/b) instead of the
-            // mirrored light colour (bank_r/g/b) so the bank identity stays visible.
+            // Uses bank_r/g/b which mirrors the assigned light's colour when mirror is on.
             float val = 0.0f;
             Color bank_color;
             switch (id(active_bank)) {
               case 0:
                 val = id(bank_value_0);
-                bank_color = (id(bank_updating) && id(bank_mirror_0))
-                  ? Color(id(bank_mirror_r_0), id(bank_mirror_g_0), id(bank_mirror_b_0))
-                  : Color(id(bank_r_0), id(bank_g_0), id(bank_b_0));
+                bank_color = Color(id(bank_r_0), id(bank_g_0), id(bank_b_0));
                 break;
               case 1:
                 val = id(bank_value_1);
-                bank_color = (id(bank_updating) && id(bank_mirror_1))
-                  ? Color(id(bank_mirror_r_1), id(bank_mirror_g_1), id(bank_mirror_b_1))
-                  : Color(id(bank_r_1), id(bank_g_1), id(bank_b_1));
+                bank_color = Color(id(bank_r_1), id(bank_g_1), id(bank_b_1));
                 break;
               case 2:
                 val = id(bank_value_2);
-                bank_color = (id(bank_updating) && id(bank_mirror_2))
-                  ? Color(id(bank_mirror_r_2), id(bank_mirror_g_2), id(bank_mirror_b_2))
-                  : Color(id(bank_r_2), id(bank_g_2), id(bank_b_2));
+                bank_color = Color(id(bank_r_2), id(bank_g_2), id(bank_b_2));
                 break;
               case 3:
                 val = id(bank_value_3);
-                bank_color = (id(bank_updating) && id(bank_mirror_3))
-                  ? Color(id(bank_mirror_r_3), id(bank_mirror_g_3), id(bank_mirror_b_3))
-                  : Color(id(bank_r_3), id(bank_g_3), id(bank_b_3));
+                bank_color = Color(id(bank_r_3), id(bank_g_3), id(bank_b_3));
                 break;
             }
             float gauge_ratio = 12.0f * (val / 100.0f);
@@ -1278,16 +1268,19 @@ light:
           name: "Bank Indicator"
           update_interval: 50ms
           lambda: |-
-            // Light up one quadrant of 4 LEDs in the bank's colour
+            // Light up one quadrant of 4 LEDs in the bank's configured colour.
+            // Uses bank_mirror_r/g/b (configured colour) rather than bank_r/g/b
+            // so that when mirror light is on the indicator still shows the bank
+            // identity colour (Blue/Orange/Green/Purple) instead of the light colour.
             for (uint8_t i = 0; i < 12; i++) {
               it[i] = Color::BLACK;
             }
             Color bank_color;
             switch (id(active_bank)) {
-              case 0: bank_color = Color(id(bank_r_0), id(bank_g_0), id(bank_b_0)); break;
-              case 1: bank_color = Color(id(bank_r_1), id(bank_g_1), id(bank_b_1)); break;
-              case 2: bank_color = Color(id(bank_r_2), id(bank_g_2), id(bank_b_2)); break;
-              case 3: bank_color = Color(id(bank_r_3), id(bank_g_3), id(bank_b_3)); break;
+              case 0: bank_color = Color(id(bank_mirror_r_0), id(bank_mirror_g_0), id(bank_mirror_b_0)); break;
+              case 1: bank_color = Color(id(bank_mirror_r_1), id(bank_mirror_g_1), id(bank_mirror_b_1)); break;
+              case 2: bank_color = Color(id(bank_mirror_r_2), id(bank_mirror_g_2), id(bank_mirror_b_2)); break;
+              case 3: bank_color = Color(id(bank_mirror_r_3), id(bank_mirror_g_3), id(bank_mirror_b_3)); break;
             }
             // Clockwise from LED ${led_offset}: each bank occupies a quarter of the ring
             uint8_t start = (${led_offset} + id(active_bank) * 3) % 12;
