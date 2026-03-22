@@ -149,6 +149,8 @@ api:
         id(bank_passive_1) = id(ha_bank_passive_1).state;
         id(bank_passive_2) = id(ha_bank_passive_2).state;
         id(bank_passive_3) = id(ha_bank_passive_3).state;
+        id(ha_initialized) = false;
+    - script.execute: mark_ha_initialized
   on_client_disconnected:
     - script.execute: control_leds
   encryption:
@@ -336,6 +338,14 @@ globals:
     type: int
     restore_value: yes
     initial_value: '255'
+
+  # Set to true 5 seconds after HA connects — suppresses configured-colour
+  # backup updates during the startup entity push to avoid saving the
+  # mirror (light) colour over the user's configured bank colour.
+  - id: ha_initialized
+    type: bool
+    restore_value: no
+    initial_value: 'false'
 
   # Per-bank mirror light flag — true = mirror assigned RGB light colour
   - id: bank_mirror_0
@@ -873,7 +883,7 @@ binary_sensor:
     on_state:
       then:
         - lambda: |
-            if (x && !id(bank_mirror_0)) {
+            if (x && !id(bank_mirror_0) && id(ha_initialized)) {
               id(bank_mirror_r_0) = id(bank_r_0);
               id(bank_mirror_g_0) = id(bank_g_0);
               id(bank_mirror_b_0) = id(bank_b_0);
@@ -886,7 +896,7 @@ binary_sensor:
     on_state:
       then:
         - lambda: |
-            if (x && !id(bank_mirror_1)) {
+            if (x && !id(bank_mirror_1) && id(ha_initialized)) {
               id(bank_mirror_r_1) = id(bank_r_1);
               id(bank_mirror_g_1) = id(bank_g_1);
               id(bank_mirror_b_1) = id(bank_b_1);
@@ -899,7 +909,7 @@ binary_sensor:
     on_state:
       then:
         - lambda: |
-            if (x && !id(bank_mirror_2)) {
+            if (x && !id(bank_mirror_2) && id(ha_initialized)) {
               id(bank_mirror_r_2) = id(bank_r_2);
               id(bank_mirror_g_2) = id(bank_g_2);
               id(bank_mirror_b_2) = id(bank_b_2);
@@ -912,7 +922,7 @@ binary_sensor:
     on_state:
       then:
         - lambda: |
-            if (x && !id(bank_mirror_3)) {
+            if (x && !id(bank_mirror_3) && id(ha_initialized)) {
               id(bank_mirror_r_3) = id(bank_r_3);
               id(bank_mirror_g_3) = id(bank_g_3);
               id(bank_mirror_b_3) = id(bank_b_3);
@@ -943,9 +953,9 @@ text_sensor:
               id(bank_r_0) = r;
               id(bank_g_0) = g;
               id(bank_b_0) = b;
-              // If mirror is off this is the user's chosen colour — save it so
-              // it can be shown while the knob is actively being turned.
-              if (!id(bank_mirror_0)) {
+              // If mirror is off and startup push is complete, this is the
+              // user's chosen colour — save it as the configured colour backup.
+              if (!id(bank_mirror_0) && id(ha_initialized)) {
                 id(bank_mirror_r_0) = r;
                 id(bank_mirror_g_0) = g;
                 id(bank_mirror_b_0) = b;
@@ -973,7 +983,7 @@ text_sensor:
               id(bank_r_1) = r;
               id(bank_g_1) = g;
               id(bank_b_1) = b;
-              if (!id(bank_mirror_1)) {
+              if (!id(bank_mirror_1) && id(ha_initialized)) {
                 id(bank_mirror_r_1) = r;
                 id(bank_mirror_g_1) = g;
                 id(bank_mirror_b_1) = b;
@@ -1001,7 +1011,7 @@ text_sensor:
               id(bank_r_2) = r;
               id(bank_g_2) = g;
               id(bank_b_2) = b;
-              if (!id(bank_mirror_2)) {
+              if (!id(bank_mirror_2) && id(ha_initialized)) {
                 id(bank_mirror_r_2) = r;
                 id(bank_mirror_g_2) = g;
                 id(bank_mirror_b_2) = b;
@@ -1029,7 +1039,7 @@ text_sensor:
               id(bank_r_3) = r;
               id(bank_g_3) = g;
               id(bank_b_3) = b;
-              if (!id(bank_mirror_3)) {
+              if (!id(bank_mirror_3) && id(ha_initialized)) {
                 id(bank_mirror_r_3) = r;
                 id(bank_mirror_g_3) = g;
                 id(bank_mirror_b_3) = b;
@@ -1688,6 +1698,15 @@ event:
       - easter_egg_press
 
 script:
+  # Wait 5 seconds after HA connects before allowing configured-colour backup
+  # updates. This prevents the startup entity-state push (which includes the
+  # mirror/light colour) from overwriting the stored configured bank colour.
+  - id: mark_ha_initialized
+    mode: restart
+    then:
+      - delay: 5s
+      - lambda: id(ha_initialized) = true;
+
   # Stub for set_mode_led_color (called on HA client connect; in control mode sets LEDs to white gauge,
   # in listening mode resets to idle blue. Full rendering is handled by control_leds.)
   - id: set_mode_led_color
