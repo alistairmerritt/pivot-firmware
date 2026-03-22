@@ -355,50 +355,58 @@ globals:
     restore_value: yes
     initial_value: 'false'
 
+  # Configured (pre-mirror) colour per bank — saved when mirror is off so the
+  # bank's chosen colour can be shown while the knob is actively being turned,
+  # even if mirror has overwritten bank_r/g/b with the light's colour.
+  # bank_mirror_r_0 was missing from the original globals — fixed here.
+  - id: bank_mirror_r_0
+    type: int
+    restore_value: yes
+    initial_value: '40'   # matches bank_r_0 default (Blue)
   - id: bank_mirror_g_0
     type: int
-    restore_value: no
-    initial_value: '0'
+    restore_value: yes
+    initial_value: '137'  # matches bank_g_0 default
   - id: bank_mirror_b_0
     type: int
-    restore_value: no
-    initial_value: '0'
+    restore_value: yes
+    initial_value: '255'  # matches bank_b_0 default
   - id: bank_mirror_r_1
     type: int
-    restore_value: no
-    initial_value: '0'
+    restore_value: yes
+    initial_value: '255'  # matches bank_r_1 default (Orange)
   - id: bank_mirror_g_1
     type: int
-    restore_value: no
-    initial_value: '0'
+    restore_value: yes
+    initial_value: '125'  # matches bank_g_1 default
   - id: bank_mirror_b_1
     type: int
-    restore_value: no
-    initial_value: '0'
+    restore_value: yes
+    initial_value: '25'   # matches bank_b_1 default
   - id: bank_mirror_r_2
     type: int
-    restore_value: no
-    initial_value: '0'
+    restore_value: yes
+    initial_value: '151'  # matches bank_r_2 default (Green)
   - id: bank_mirror_g_2
     type: int
-    restore_value: no
-    initial_value: '0'
+    restore_value: yes
+    initial_value: '255'  # matches bank_g_2 default
   - id: bank_mirror_b_2
     type: int
-    restore_value: no
-    initial_value: '0'
+    restore_value: yes
+    initial_value: '61'   # matches bank_b_2 default
   - id: bank_mirror_r_3
     type: int
-    restore_value: no
-    initial_value: '0'
+    restore_value: yes
+    initial_value: '200'  # matches bank_r_3 default (Purple)
   - id: bank_mirror_g_3
     type: int
-    restore_value: no
-    initial_value: '0'
+    restore_value: yes
+    initial_value: '0'    # matches bank_g_3 default
   - id: bank_mirror_b_3
     type: int
-    restore_value: no
-    initial_value: '0'
+    restore_value: yes
+    initial_value: '255'  # matches bank_b_3 default
 
   - id: bank_mirror_light_on_1
     type: bool
@@ -857,12 +865,19 @@ binary_sensor:
         - script.execute: control_leds
 
   # Sync mirror light switch state from HA — per bank
+  # When mirror turns ON, snapshot the current bank colour into bank_mirror_r/g/b
+  # so it can be restored while the knob is actively being turned.
   - platform: homeassistant
     id: ha_bank_mirror_0
     entity_id: switch.${device_suffix}_bank_0_mirror_light
     on_state:
       then:
         - lambda: |
+            if (x && !id(bank_mirror_0)) {
+              id(bank_mirror_r_0) = id(bank_r_0);
+              id(bank_mirror_g_0) = id(bank_g_0);
+              id(bank_mirror_b_0) = id(bank_b_0);
+            }
             id(bank_mirror_0) = x;
             id(control_leds).execute();
   - platform: homeassistant
@@ -871,6 +886,11 @@ binary_sensor:
     on_state:
       then:
         - lambda: |
+            if (x && !id(bank_mirror_1)) {
+              id(bank_mirror_r_1) = id(bank_r_1);
+              id(bank_mirror_g_1) = id(bank_g_1);
+              id(bank_mirror_b_1) = id(bank_b_1);
+            }
             id(bank_mirror_1) = x;
             id(control_leds).execute();
   - platform: homeassistant
@@ -879,6 +899,11 @@ binary_sensor:
     on_state:
       then:
         - lambda: |
+            if (x && !id(bank_mirror_2)) {
+              id(bank_mirror_r_2) = id(bank_r_2);
+              id(bank_mirror_g_2) = id(bank_g_2);
+              id(bank_mirror_b_2) = id(bank_b_2);
+            }
             id(bank_mirror_2) = x;
             id(control_leds).execute();
   - platform: homeassistant
@@ -887,6 +912,11 @@ binary_sensor:
     on_state:
       then:
         - lambda: |
+            if (x && !id(bank_mirror_3)) {
+              id(bank_mirror_r_3) = id(bank_r_3);
+              id(bank_mirror_g_3) = id(bank_g_3);
+              id(bank_mirror_b_3) = id(bank_b_3);
+            }
             id(bank_mirror_3) = x;
             id(control_leds).execute();
 
@@ -913,6 +943,13 @@ text_sensor:
               id(bank_r_0) = r;
               id(bank_g_0) = g;
               id(bank_b_0) = b;
+              // If mirror is off this is the user's chosen colour — save it so
+              // it can be shown while the knob is actively being turned.
+              if (!id(bank_mirror_0)) {
+                id(bank_mirror_r_0) = r;
+                id(bank_mirror_g_0) = g;
+                id(bank_mirror_b_0) = b;
+              }
               id(control_leds).execute();
             }
   - platform: homeassistant
@@ -936,6 +973,11 @@ text_sensor:
               id(bank_r_1) = r;
               id(bank_g_1) = g;
               id(bank_b_1) = b;
+              if (!id(bank_mirror_1)) {
+                id(bank_mirror_r_1) = r;
+                id(bank_mirror_g_1) = g;
+                id(bank_mirror_b_1) = b;
+              }
               id(control_leds).execute();
             }
   - platform: homeassistant
@@ -959,6 +1001,11 @@ text_sensor:
               id(bank_r_2) = r;
               id(bank_g_2) = g;
               id(bank_b_2) = b;
+              if (!id(bank_mirror_2)) {
+                id(bank_mirror_r_2) = r;
+                id(bank_mirror_g_2) = g;
+                id(bank_mirror_b_2) = b;
+              }
               id(control_leds).execute();
             }
   - platform: homeassistant
@@ -982,6 +1029,11 @@ text_sensor:
               id(bank_r_3) = r;
               id(bank_g_3) = g;
               id(bank_b_3) = b;
+              if (!id(bank_mirror_3)) {
+                id(bank_mirror_r_3) = r;
+                id(bank_mirror_g_3) = g;
+                id(bank_mirror_b_3) = b;
+              }
               id(control_leds).execute();
             }
 
@@ -1186,14 +1238,37 @@ light:
           name: "Control Mode Gauge"
           update_interval: 50ms
           lambda: |-
-            // Per-bank coloured gauge showing active bank value (0-100) across 12 LEDs
+            // Per-bank coloured gauge showing active bank value (0-100) across 12 LEDs.
+            // While the knob is actively being turned (bank_updating) and mirror is on,
+            // use the saved configured colour (bank_mirror_r/g/b) instead of the
+            // mirrored light colour (bank_r/g/b) so the bank identity stays visible.
             float val = 0.0f;
             Color bank_color;
             switch (id(active_bank)) {
-              case 0: val = id(bank_value_0); bank_color = Color(id(bank_r_0), id(bank_g_0), id(bank_b_0)); break;
-              case 1: val = id(bank_value_1); bank_color = Color(id(bank_r_1), id(bank_g_1), id(bank_b_1)); break;
-              case 2: val = id(bank_value_2); bank_color = Color(id(bank_r_2), id(bank_g_2), id(bank_b_2)); break;
-              case 3: val = id(bank_value_3); bank_color = Color(id(bank_r_3), id(bank_g_3), id(bank_b_3)); break;
+              case 0:
+                val = id(bank_value_0);
+                bank_color = (id(bank_updating) && id(bank_mirror_0))
+                  ? Color(id(bank_mirror_r_0), id(bank_mirror_g_0), id(bank_mirror_b_0))
+                  : Color(id(bank_r_0), id(bank_g_0), id(bank_b_0));
+                break;
+              case 1:
+                val = id(bank_value_1);
+                bank_color = (id(bank_updating) && id(bank_mirror_1))
+                  ? Color(id(bank_mirror_r_1), id(bank_mirror_g_1), id(bank_mirror_b_1))
+                  : Color(id(bank_r_1), id(bank_g_1), id(bank_b_1));
+                break;
+              case 2:
+                val = id(bank_value_2);
+                bank_color = (id(bank_updating) && id(bank_mirror_2))
+                  ? Color(id(bank_mirror_r_2), id(bank_mirror_g_2), id(bank_mirror_b_2))
+                  : Color(id(bank_r_2), id(bank_g_2), id(bank_b_2));
+                break;
+              case 3:
+                val = id(bank_value_3);
+                bank_color = (id(bank_updating) && id(bank_mirror_3))
+                  ? Color(id(bank_mirror_r_3), id(bank_mirror_g_3), id(bank_mirror_b_3))
+                  : Color(id(bank_r_3), id(bank_g_3), id(bank_b_3));
+                break;
             }
             float gauge_ratio = 12.0f * (val / 100.0f);
             for (uint8_t i = 0; i < 12; i++) {
