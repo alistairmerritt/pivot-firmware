@@ -285,6 +285,21 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
+  # Mirrors switch.${device_suffix}_dim_when_idle — dims LEDs to 50% after 2s of no interaction
+  - id: dim_when_idle
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  # Timestamp (ms) of the last knob/button/bank interaction — used for idle detection
+  - id: last_interaction_ms
+    type: uint32_t
+    restore_value: no
+    initial_value: '0'
+  # True when device has been idle for >2s and dim_when_idle is active
+  - id: led_is_idle
+    type: bool
+    restore_value: no
+    initial_value: 'false'
   # Whether each bank is passive (scene/script) — knob does nothing
   - id: bank_passive_0
     type: bool
@@ -533,6 +548,7 @@ binary_sensor:
       number: GPIO0
       inverted: true
     on_press:
+      - lambda: id(last_interaction_ms) = millis(); id(led_is_idle) = false;
       - script.execute: control_leds
     on_release:
       - script.execute: control_leds
@@ -871,6 +887,19 @@ binary_sensor:
     on_state:
       then:
         - lambda: id(show_control_value) = x;
+        - script.execute: control_leds
+  # Sync dim_when_idle from Home Assistant switch
+  - platform: homeassistant
+    id: ha_dim_when_idle
+    entity_id: switch.${device_suffix}_dim_when_idle
+    on_state:
+      then:
+        - lambda: |-
+            id(dim_when_idle) = x;
+            if (!x) {
+              // Feature turned off — immediately restore full brightness
+              id(led_is_idle) = false;
+            }
         - script.execute: control_leds
 
   # Sync mirror light switch state from HA — per bank
@@ -1584,7 +1613,7 @@ sensor:
     pin_b: GPIO18
     resolution: 2
     on_clockwise:
-      - lambda: id(dial_touched) = true;
+      - lambda: id(dial_touched) = true; id(last_interaction_ms) = millis(); id(led_is_idle) = false;
       - if:
           condition:
             lambda: return id(control_mode);
@@ -1615,7 +1644,7 @@ sensor:
                       id: control_hue
                       increase_hue: true
     on_anticlockwise:
-      - lambda: id(dial_touched) = true;
+      - lambda: id(dial_touched) = true; id(last_interaction_ms) = millis(); id(led_is_idle) = false;
       - if:
           condition:
             lambda: return id(control_mode);
@@ -1700,11 +1729,28 @@ sensor:
             if (bank >= 0 && bank <= 3 && bank != id(active_bank)) {
               id(active_bank) = bank;
               id(bank_display_active) = true;
+              id(last_interaction_ms) = millis();
+              id(led_is_idle) = false;
               id(control_leds).execute();
             }
         - delay: 750ms
         - lambda: id(bank_display_active) = false;
         - script.execute: control_leds
+
+
+interval:
+  # Idle detection: check every 500ms whether the device has been untouched for >2s.
+  # Only active when dim_when_idle AND show_control_value AND control_mode are all on.
+  # Triggers control_leds only when idle state actually changes (avoids redundant redraws).
+  - interval: 500ms
+    then:
+      - lambda: |-
+          if (!id(dim_when_idle) || !id(show_control_value) || !id(control_mode)) return;
+          bool now_idle = (millis() - id(last_interaction_ms)) > 2000;
+          if (now_idle != id(led_is_idle)) {
+            id(led_is_idle) = now_idle;
+            id(control_leds).execute();
+          }
 
 
 event:
@@ -2344,8 +2390,13 @@ script:
                                (id(active_bank) == 2) ? id(bank_passive_2) : id(bank_passive_3);
                 bool show = id(show_control_value) || id(dial_touched);
                 if (show) {
+                  // Dim to 40% when idle, full 80% when active.
+                  // Fade to dim over 1.5s; snap back instantly on interaction.
+                  bool idle = id(dim_when_idle) && id(led_is_idle) && id(show_control_value);
+                  float brightness = idle ? 0.4f : 0.8f;
                   auto call = id(voice_assistant_leds).turn_on();
-                  call.set_brightness(0.8f);
+                  call.set_brightness(brightness);
+                  call.set_transition_length(idle ? 1500 : 0);
                   call.set_effect(passive ? "Bank Solid Color" : "Control Mode Gauge");
                   call.perform();
                 } else {
