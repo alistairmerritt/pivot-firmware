@@ -2388,8 +2388,10 @@ script:
                 bool passive = (id(active_bank) == 0) ? id(bank_passive_0) :
                                (id(active_bank) == 1) ? id(bank_passive_1) :
                                (id(active_bank) == 2) ? id(bank_passive_2) : id(bank_passive_3);
+                // Passive banks (scene/script/switch/input_boolean) have no value —
+                // show nothing. Bank Indicator still shows during bank switching above.
                 bool show = id(show_control_value) || id(dial_touched);
-                if (show) {
+                if (show && !passive) {
                   // Dim to 40% when idle, full 80% when active.
                   // Fade to dim over 1.5s; snap back instantly on interaction.
                   bool idle = id(dim_when_idle) && id(led_is_idle) && id(show_control_value);
@@ -2397,7 +2399,7 @@ script:
                   auto call = id(voice_assistant_leds).turn_on();
                   call.set_brightness(brightness);
                   call.set_transition_length(idle ? 1500 : 0);
-                  call.set_effect(passive ? "Bank Solid Color" : "Control Mode Gauge");
+                  call.set_effect("Control Mode Gauge");
                   call.perform();
                 } else {
                   id(voice_assistant_leds).turn_off().perform();
