@@ -517,6 +517,25 @@ switch:
           duration: 1.0s
       # Refresh the LED ring
       - script.execute: control_leds
+      # If this was a Pivot timer alert (timer_state == alerting), notify HA
+      # so the integration knows the alarm was dismissed (by button, stop wake
+      # word, or 15-minute timeout).  Guarded so native voice-assistant timers
+      # (which also use timer_ringing) don't interfere with Pivot timer state.
+      - if:
+          condition:
+            text_sensor.state:
+              id: ha_timer_state
+              state: "alerting"
+          then:
+            - homeassistant.action:
+                action: select.select_option
+                data:
+                  entity_id: select.${device_suffix}_timer_state
+                  option: idle
+            - homeassistant.action:
+                action: switch.turn_on
+                data:
+                  entity_id: switch.${device_suffix}_dim_when_idle
     on_turn_on:
       # Duck audio
       - mixer_speaker.apply_ducking:
@@ -1107,8 +1126,21 @@ text_sensor:
               id(bank_mirror_g_3) = (hval(hex[3]) << 4) | hval(hex[4]);
               id(bank_mirror_b_3) = (hval(hex[5]) << 4) | hval(hex[6]);
             }
-
-
+  # Pivot timer state — when set to 'alerting' by the integration, trigger the
+  # native timer alarm (sound + LED ring + button dismiss) exactly as the stock
+  # voice-assistant timer does.  No HA automation or media_player call needed.
+  - platform: homeassistant
+    id: ha_timer_state
+    entity_id: select.${device_suffix}_timer_state
+    on_value:
+      then:
+        - if:
+            condition:
+              text_sensor.state:
+                id: ha_timer_state
+                state: "alerting"
+            then:
+              - switch.turn_on: timer_ringing
 
 light:
   # Hardware LED ring. Not used because remapping needed
