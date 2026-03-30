@@ -1151,12 +1151,12 @@ text_sensor:
               - switch.turn_on: timer_ringing
             else:
               # A state change away from alerting (e.g. idle set from a dashboard
-              # card) should dismiss the alarm on the device if Pivot started it.
+              # card) should dismiss the alarm on the device if it is still ringing.
+              # on_value only fires when select.{suffix}_timer_state changes, so
+              # this cannot fire during a native voice-assistant timer alarm.
               - if:
                   condition:
-                    and:
-                      - lambda: return id(pivot_timer_active);
-                      - switch.is_on: timer_ringing
+                    switch.is_on: timer_ringing
                   then:
                     - switch.turn_off: timer_ringing
 
