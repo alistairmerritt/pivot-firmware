@@ -243,6 +243,13 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
+  # Global variable tracking if the Pivot timer alarm is currently active on this device.
+  # Set to true when ha_timer_state transitions to alerting, cleared in timer_ringing.on_turn_off.
+  # Used to distinguish Pivot timer alerts from native voice-assistant timer alerts.
+  - id: pivot_timer_active
+    type: bool
+    restore_value: no
+    initial_value: 'false'
   # Global variable tracking if the device is in control mode (true) or listening mode (false)
   - id: control_mode
     type: bool
@@ -517,6 +524,8 @@ switch:
           duration: 1.0s
       # Refresh the LED ring
       - script.execute: control_leds
+      # Clear the Pivot timer active flag regardless of dismiss path.
+      - lambda: id(pivot_timer_active) = false;
       # If this was a Pivot timer alert (timer_state == alerting), notify HA
       # so the integration knows the alarm was dismissed (by button, stop wake
       # word, or 15-minute timeout).  Guarded so native voice-assistant timers
@@ -593,7 +602,6 @@ binary_sensor:
               condition:
                 lambda: return !id(init_in_progress) && !id(color_changed) && !id(group_volume_changed) && !id(dial_touched);
               then:
-                - lambda: id(button_press_event).trigger("single_press");
                 - if:
                     condition:
                       switch.is_on: timer_ringing
@@ -606,6 +614,7 @@ binary_sensor:
                           then:
                             - voice_assistant.stop:
                           else:
+                            - lambda: id(button_press_event).trigger("single_press");
                             - if:
                                 condition:
                                   media_player.is_announcing:
@@ -1140,7 +1149,18 @@ text_sensor:
                 id: ha_timer_state
                 state: "alerting"
             then:
+              - lambda: id(pivot_timer_active) = true;
               - switch.turn_on: timer_ringing
+            else:
+              # A state change away from alerting (e.g. idle set from a dashboard
+              # card) should dismiss the alarm on the device if Pivot started it.
+              - if:
+                  condition:
+                    and:
+                      - lambda: return id(pivot_timer_active);
+                      - switch.is_on: timer_ringing
+                  then:
+                    - switch.turn_off: timer_ringing
 
 light:
   # Hardware LED ring. Not used because remapping needed
