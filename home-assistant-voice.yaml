@@ -491,11 +491,12 @@ switch:
     entity_category: config
     optimistic: true
     restore_mode: RESTORE_DEFAULT_ON
-  # Internal switch to track when a timer is ringing on the device.
+  # Switch to track when a timer is ringing on the device.
+  # Exposed to HA so a dashboard button can dismiss the alarm via switch.turn_off.
   - platform: template
     id: timer_ringing
+    name: "Timer Ringing"
     optimistic: true
-    internal: true
     restore_mode: ALWAYS_OFF
     on_turn_off:
       # Disable stop wake word
