@@ -1145,9 +1145,7 @@ text_sensor:
       then:
         - if:
             condition:
-              text_sensor.state:
-                id: ha_timer_state
-                state: "alerting"
+              lambda: return x == "alerting";
             then:
               - lambda: id(pivot_timer_active) = true;
               - switch.turn_on: timer_ringing
