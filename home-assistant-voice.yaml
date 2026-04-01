@@ -545,13 +545,26 @@ switch:
           duration: 0.0s
       # Enable stop wake word
       - micro_wake_word.enable_model: stop
-      # Ring timer
-      - script.execute: ring_timer
+      # Ring timer — skipped when silent mode is on
+      - if:
+          condition:
+            switch.is_off: timer_silent_mode
+          then:
+            - script.execute: ring_timer
       # Refresh LED
       - script.execute: control_leds
       # If 15 minutes have passed and the timer is still ringing, stop it.
       - delay: 15min
       - switch.turn_off: timer_ringing
+  # Silent mode switch — when on, the alarm LED ring and wake word still
+  # activate but the alarm sound is suppressed.  Controlled by the blueprint
+  # before setting timer_state to alerting.  Off by default.
+  - platform: template
+    id: timer_silent_mode
+    name: "Timer Silent Mode"
+    optimistic: true
+    restore_mode: ALWAYS_OFF
+    internal: false
   - platform: gpio
     pin: GPIO47
     id: internal_speaker_amp
