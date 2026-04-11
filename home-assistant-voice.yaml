@@ -619,7 +619,6 @@ binary_sensor:
                           then:
                             - voice_assistant.stop:
                           else:
-                            - lambda: id(button_press_event).trigger("single_press");
                             - if:
                                 condition:
                                   media_player.is_announcing:
@@ -637,6 +636,7 @@ binary_sensor:
                                         - media_player.pause:
                                             id: external_media_player
                                       else:
+                                        - lambda: id(button_press_event).trigger("single_press");
                                         - if:
                                             condition:
                                               and:
