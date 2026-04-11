@@ -639,25 +639,17 @@ binary_sensor:
                                       else:
                                         - if:
                                             condition:
-                                              lambda: return id(control_mode);
+                                              and:
+                                                - lambda: return !id(control_mode);
+                                                - switch.is_off: master_mute_switch
+                                                - not: voice_assistant.is_running
                                             then:
-                                              - homeassistant.action:
-                                                  action: script.turn_on
-                                                  data:
-                                                    entity_id: script.${device_suffix}_bank_toggle
-                                            else:
-                                              - if:
-                                                  condition:
-                                                    and:
-                                                      - switch.is_off: master_mute_switch
-                                                      - not: voice_assistant.is_running
-                                                  then:
-                                                    - script.execute:
-                                                        id: play_sound
-                                                        priority: true
-                                                        sound_file: "center_button_press_sound"
-                                                    - delay: 300ms
-                                                    - voice_assistant.start:
+                                              - script.execute:
+                                                  id: play_sound
+                                                  priority: true
+                                                  sound_file: "center_button_press_sound"
+                                              - delay: 300ms
+                                              - voice_assistant.start:
       # Double Click
       #  . Toggles control mode on/off
       - timing:
