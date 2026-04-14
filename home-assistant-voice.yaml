@@ -54,7 +54,7 @@ substitutions:
   voice_assist_not_ready_phase_id: '10'
   # The voice assistant encountered an error
   voice_assist_error_phase_id: '11'
-  # Change this to true in case you ahve a hidden SSID at home.
+  # Change this to true in case you have a hidden SSID at home.
   hidden_ssid: "false"
   # Substitutions for audio files
   jack_connected_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/jack_connected.flac
@@ -135,7 +135,7 @@ network:
   enable_ipv6: true
 
 logger:
-  level: DEBUG
+  level: INFO
   logs:
     sensor: WARN  # avoids logging debug sensor updates
 
@@ -866,7 +866,7 @@ binary_sensor:
   # Sync passive flags from HA template binary sensors (on = scene/script bank, knob disabled)
   - platform: homeassistant
     id: ha_bank_passive_0
-    entity_id: binary_sensor.${device_suffix}_bank_0_passive
+    entity_id: binary_sensor.${device_suffix}_bank_1_passive
     on_state:
       then:
         - lambda: |
@@ -874,7 +874,7 @@ binary_sensor:
             id(control_leds).execute();
   - platform: homeassistant
     id: ha_bank_passive_1
-    entity_id: binary_sensor.${device_suffix}_bank_1_passive
+    entity_id: binary_sensor.${device_suffix}_bank_2_passive
     on_state:
       then:
         - lambda: |
@@ -882,7 +882,7 @@ binary_sensor:
             id(control_leds).execute();
   - platform: homeassistant
     id: ha_bank_passive_2
-    entity_id: binary_sensor.${device_suffix}_bank_2_passive
+    entity_id: binary_sensor.${device_suffix}_bank_3_passive
     on_state:
       then:
         - lambda: |
@@ -890,7 +890,7 @@ binary_sensor:
             id(control_leds).execute();
   - platform: homeassistant
     id: ha_bank_passive_3
-    entity_id: binary_sensor.${device_suffix}_bank_3_passive
+    entity_id: binary_sensor.${device_suffix}_bank_4_passive
     on_state:
       then:
         - lambda: |
@@ -932,7 +932,7 @@ binary_sensor:
   # so it can be restored while the knob is actively being turned.
   - platform: homeassistant
     id: ha_bank_mirror_0
-    entity_id: switch.${device_suffix}_bank_0_mirror_light
+    entity_id: switch.${device_suffix}_bank_1_mirror_light
     on_state:
       then:
         - lambda: |
@@ -940,7 +940,7 @@ binary_sensor:
             id(control_leds).execute();
   - platform: homeassistant
     id: ha_bank_mirror_1
-    entity_id: switch.${device_suffix}_bank_1_mirror_light
+    entity_id: switch.${device_suffix}_bank_2_mirror_light
     on_state:
       then:
         - lambda: |
@@ -948,7 +948,7 @@ binary_sensor:
             id(control_leds).execute();
   - platform: homeassistant
     id: ha_bank_mirror_2
-    entity_id: switch.${device_suffix}_bank_2_mirror_light
+    entity_id: switch.${device_suffix}_bank_3_mirror_light
     on_state:
       then:
         - lambda: |
@@ -956,7 +956,7 @@ binary_sensor:
             id(control_leds).execute();
   - platform: homeassistant
     id: ha_bank_mirror_3
-    entity_id: switch.${device_suffix}_bank_3_mirror_light
+    entity_id: switch.${device_suffix}_bank_4_mirror_light
     on_state:
       then:
         - lambda: |
@@ -969,7 +969,7 @@ text_sensor:
   # it holds the user's configured colour.  The LED ring always uses bank_r/g/b_N.
   - platform: homeassistant
     id: ha_bank_color_0
-    entity_id: text.${device_suffix}_bank_0_color
+    entity_id: text.${device_suffix}_bank_1_color
     on_value:
       then:
       - lambda: |
@@ -991,7 +991,7 @@ text_sensor:
             }
   - platform: homeassistant
     id: ha_bank_color_1
-    entity_id: text.${device_suffix}_bank_1_color
+    entity_id: text.${device_suffix}_bank_2_color
     on_value:
       then:
       - lambda: |
@@ -1013,7 +1013,7 @@ text_sensor:
             }
   - platform: homeassistant
     id: ha_bank_color_2
-    entity_id: text.${device_suffix}_bank_2_color
+    entity_id: text.${device_suffix}_bank_3_color
     on_value:
       then:
       - lambda: |
@@ -1035,7 +1035,7 @@ text_sensor:
             }
   - platform: homeassistant
     id: ha_bank_color_3
-    entity_id: text.${device_suffix}_bank_3_color
+    entity_id: text.${device_suffix}_bank_4_color
     on_value:
       then:
       - lambda: |
@@ -1062,7 +1062,7 @@ text_sensor:
   # identity colour (Blue/Orange/Green/Purple or custom) during bank switching.
   - platform: homeassistant
     id: ha_bank_configured_color_0
-    entity_id: text.${device_suffix}_bank_0_configured_color
+    entity_id: text.${device_suffix}_bank_1_configured_color
     on_value:
       then:
       - lambda: |
@@ -1080,7 +1080,7 @@ text_sensor:
             }
   - platform: homeassistant
     id: ha_bank_configured_color_1
-    entity_id: text.${device_suffix}_bank_1_configured_color
+    entity_id: text.${device_suffix}_bank_2_configured_color
     on_value:
       then:
       - lambda: |
@@ -1098,7 +1098,7 @@ text_sensor:
             }
   - platform: homeassistant
     id: ha_bank_configured_color_2
-    entity_id: text.${device_suffix}_bank_2_configured_color
+    entity_id: text.${device_suffix}_bank_3_configured_color
     on_value:
       then:
       - lambda: |
@@ -1116,7 +1116,7 @@ text_sensor:
             }
   - platform: homeassistant
     id: ha_bank_configured_color_3
-    entity_id: text.${device_suffix}_bank_3_configured_color
+    entity_id: text.${device_suffix}_bank_4_configured_color
     on_value:
       then:
       - lambda: |
@@ -1714,7 +1714,7 @@ sensor:
   # Sync per-bank values from Home Assistant
   - platform: homeassistant
     id: ha_bank_value_0
-    entity_id: number.${device_suffix}_bank_0_value
+    entity_id: number.${device_suffix}_bank_1_value
     on_value:
       then:
         - lambda: |
@@ -1724,7 +1724,7 @@ sensor:
             }
   - platform: homeassistant
     id: ha_bank_value_1
-    entity_id: number.${device_suffix}_bank_1_value
+    entity_id: number.${device_suffix}_bank_2_value
     on_value:
       then:
         - lambda: |
@@ -1734,7 +1734,7 @@ sensor:
             }
   - platform: homeassistant
     id: ha_bank_value_2
-    entity_id: number.${device_suffix}_bank_2_value
+    entity_id: number.${device_suffix}_bank_3_value
     on_value:
       then:
         - lambda: |
@@ -1744,7 +1744,7 @@ sensor:
             }
   - platform: homeassistant
     id: ha_bank_value_3
-    entity_id: number.${device_suffix}_bank_3_value
+    entity_id: number.${device_suffix}_bank_4_value
     on_value:
       then:
         - lambda: |
@@ -2327,7 +2327,7 @@ script:
                   - homeassistant.action:
                       action: number.set_value
                       data:
-                        entity_id: number.${device_suffix}_bank_0_value
+                        entity_id: number.${device_suffix}_bank_1_value
                       data_template:
                         value: !lambda return id(bank_value_0);
             - if:
@@ -2337,7 +2337,7 @@ script:
                   - homeassistant.action:
                       action: number.set_value
                       data:
-                        entity_id: number.${device_suffix}_bank_1_value
+                        entity_id: number.${device_suffix}_bank_2_value
                       data_template:
                         value: !lambda return id(bank_value_1);
             - if:
@@ -2347,7 +2347,7 @@ script:
                   - homeassistant.action:
                       action: number.set_value
                       data:
-                        entity_id: number.${device_suffix}_bank_2_value
+                        entity_id: number.${device_suffix}_bank_3_value
                       data_template:
                         value: !lambda return id(bank_value_2);
             - if:
@@ -2357,7 +2357,7 @@ script:
                   - homeassistant.action:
                       action: number.set_value
                       data:
-                        entity_id: number.${device_suffix}_bank_3_value
+                        entity_id: number.${device_suffix}_bank_4_value
                       data_template:
                         value: !lambda return id(bank_value_3);
             - delay: 1s
