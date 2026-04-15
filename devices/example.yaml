@@ -15,8 +15,8 @@ substitutions:
   # PIVOT DEVICE CONFIGURATION — fill in these values for each device
   # =======================================================================
 
-  # ESPHome device name (slug, no spaces or dashes)
-  device_name: home_assistant_voice_lounge
+  # ESPHome device name (slug, no spaces — use dashes not underscores)
+  device_name: home-assistant-voice-lounge
 
   # Friendly name shown in HA and ESPHome
   device_friendly_name: Lounge VPE
