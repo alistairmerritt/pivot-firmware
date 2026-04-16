@@ -972,7 +972,7 @@ text_sensor:
     entity_id: text.${device_suffix}_bank_1_color
     on_value:
       then:
-      - lambda: |
+        - lambda: |
             std::string hex = x;
             if (hex.size() == 7 && hex[0] == '#') {
               auto hval = [](char c) -> int {
@@ -994,7 +994,7 @@ text_sensor:
     entity_id: text.${device_suffix}_bank_2_color
     on_value:
       then:
-      - lambda: |
+        - lambda: |
             std::string hex = x;
             if (hex.size() == 7 && hex[0] == '#') {
               auto hval = [](char c) -> int {
@@ -1016,7 +1016,7 @@ text_sensor:
     entity_id: text.${device_suffix}_bank_3_color
     on_value:
       then:
-      - lambda: |
+        - lambda: |
             std::string hex = x;
             if (hex.size() == 7 && hex[0] == '#') {
               auto hval = [](char c) -> int {
@@ -1038,7 +1038,7 @@ text_sensor:
     entity_id: text.${device_suffix}_bank_4_color
     on_value:
       then:
-      - lambda: |
+        - lambda: |
             std::string hex = x;
             if (hex.size() == 7 && hex[0] == '#') {
               auto hval = [](char c) -> int {
@@ -1065,7 +1065,7 @@ text_sensor:
     entity_id: text.${device_suffix}_bank_1_configured_color
     on_value:
       then:
-      - lambda: |
+        - lambda: |
             std::string hex = x;
             if (hex.size() == 7 && hex[0] == '#') {
               auto hval = [](char c) -> int {
@@ -1083,7 +1083,7 @@ text_sensor:
     entity_id: text.${device_suffix}_bank_2_configured_color
     on_value:
       then:
-      - lambda: |
+        - lambda: |
             std::string hex = x;
             if (hex.size() == 7 && hex[0] == '#') {
               auto hval = [](char c) -> int {
@@ -1101,7 +1101,7 @@ text_sensor:
     entity_id: text.${device_suffix}_bank_3_configured_color
     on_value:
       then:
-      - lambda: |
+        - lambda: |
             std::string hex = x;
             if (hex.size() == 7 && hex[0] == '#') {
               auto hval = [](char c) -> int {
@@ -1119,7 +1119,7 @@ text_sensor:
     entity_id: text.${device_suffix}_bank_4_configured_color
     on_value:
       then:
-      - lambda: |
+        - lambda: |
             std::string hex = x;
             if (hex.size() == 7 && hex[0] == '#') {
               auto hval = [](char c) -> int {
@@ -2423,9 +2423,6 @@ script:
           data_template:
             value: !lambda return (float)(id(active_bank) + 1);
       - script.execute: control_leds
-
-
-
 
   - id: control_leds_control_mode
     then:
