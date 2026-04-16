@@ -1,5 +1,7 @@
 # Pivot — Firmware
 
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+
 ESPHome firmware for the Home Assistant Voice Preview Edition (VPE) that turns it into a physical control knob for Home Assistant.
 
 > **New to Pivot?** Start at the [Pivot documentation site](https://alistairmerritt.github.io/pivot) for a full getting started guide, integration setup, and troubleshooting.
