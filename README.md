@@ -26,7 +26,7 @@ Pivot firmware works alongside the [Pivot HA integration](https://github.com/ali
 ## Requirements
 
 - Home Assistant Voice Preview Edition (VPE)
-- ESPHome installed (via the ESPHome Device Builder add-on)
+- **ESPHome Device Builder 2026.4.0 or later** — Pivot firmware depends on components merged into ESPHome core in this release. Older versions will fail to compile. Update the add-on before flashing.
 - The [Pivot HA integration](https://github.com/alistairmerritt/pivot-integration) installed in Home Assistant
 
 ## Quick start
@@ -34,10 +34,13 @@ Pivot firmware works alongside the [Pivot HA integration](https://github.com/ali
 1. **Copy `devices/example.yaml`** into your ESPHome dashboard as a new device
 2. Fill in your device-specific values (name, suffix, WiFi, API key)
 3. Click **Install → Wirelessly** — or via USB for the very first flash
-4. Add the device to Home Assistant via the ESPHome integration
-5. Install the [Pivot HA integration](https://github.com/alistairmerritt/pivot-integration) and add your device
+4. After the first flash, **disconnect the VPE from power, wait a few seconds, then reconnect**
+5. Add the device to Home Assistant via the ESPHome integration
+6. Install the [Pivot HA integration](https://github.com/alistairmerritt/pivot-integration) and add your device
 
 ESPHome fetches `home-assistant-voice.yaml` from GitHub automatically at compile time — you don't need to touch it. When a new version of Pivot firmware is released, just hit **Install** in ESPHome and it pulls the latest.
+
+> **Note:** HA's Updates page (Settings → Updates) will notify you of new Pivot **integration** releases via HACS, but not firmware changes. Firmware updates are always initiated manually from ESPHome Device Builder. Check the [changelog](https://alistairmerritt.github.io/pivot/changelog/) to see what's changed.
 
 ## Per-device configuration (`devices/example.yaml`)
 
@@ -84,7 +87,20 @@ packages:
     refresh: 1d
 ```
 
-The `device_suffix` must be unique for each device and must match exactly what you enter when setting up the Pivot integration in Home Assistant.
+### `device_suffix`
+
+The most important field. Must be unique across all your Pivot devices, lowercase with no spaces or dashes (underscores are fine), and identical to what you enter in the Pivot integration setup. It determines all entity IDs — e.g. `ha_voice_lounge` produces `number.ha_voice_lounge_active_bank`, `text.ha_voice_lounge_bank_1_entity`, etc.
+
+### `led_offset`
+
+Set to `'6'` if your device is flat on a surface with the cable facing away from you. Set to `'0'` if it is upright on a stand with the cable at the bottom. This controls which physical LED is position 0 on the ring so bank colours and gauges appear in the correct position relative to how you're looking at it.
+
+### Before you flash — note these down
+
+| Value | Where it's used |
+| --- | --- |
+| `device_suffix` | Required when adding your device in the Pivot integration |
+| `api_encryption_key` | Required if you ever need to re-add the device to Home Assistant |
 
 ## Multiple devices
 
