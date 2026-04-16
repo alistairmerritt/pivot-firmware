@@ -1655,17 +1655,26 @@ sensor:
             lambda: return id(control_mode);
           then:
             - if:
+                # VA is speaking — treat knob as volume, not bank control
                 condition:
-                  binary_sensor.is_on: center_button
+                  lambda: return id(voice_assistant_phase) == ${voice_assist_replying_phase_id};
                 then:
-                  # Hold + turn in Control Mode: switch bank
                   - script.execute:
-                      id: bank_switch
-                      increase: true
+                      id: control_volume
+                      increase_volume: true
                 else:
-                  - script.execute:
-                      id: bank_value_change
-                      increase: true
+                  - if:
+                      condition:
+                        binary_sensor.is_on: center_button
+                      then:
+                        # Hold + turn in Control Mode: switch bank
+                        - script.execute:
+                            id: bank_switch
+                            increase: true
+                      else:
+                        - script.execute:
+                            id: bank_value_change
+                            increase: true
           else:
             - if:
                 condition:
@@ -1686,17 +1695,26 @@ sensor:
             lambda: return id(control_mode);
           then:
             - if:
+                # VA is speaking — treat knob as volume, not bank control
                 condition:
-                  binary_sensor.is_on: center_button
+                  lambda: return id(voice_assistant_phase) == ${voice_assist_replying_phase_id};
                 then:
-                  # Hold + turn in Control Mode: switch bank
                   - script.execute:
-                      id: bank_switch
-                      increase: false
+                      id: control_volume
+                      increase_volume: false
                 else:
-                  - script.execute:
-                      id: bank_value_change
-                      increase: false
+                  - if:
+                      condition:
+                        binary_sensor.is_on: center_button
+                      then:
+                        # Hold + turn in Control Mode: switch bank
+                        - script.execute:
+                            id: bank_switch
+                            increase: false
+                      else:
+                        - script.execute:
+                            id: bank_value_change
+                            increase: false
           else:
             - if:
                 condition:
@@ -1831,6 +1849,9 @@ script:
             id(control_leds_init_state).execute();
           } else if (!id(wifi_id).is_connected() || !id(api_id).is_connected()){
             id(control_leds_no_ha_connection_state).execute();
+          } else if (id(control_mode) && id(dial_touched) && id(voice_assistant_phase) == ${voice_assist_replying_phase_id}) {
+            // VA is speaking in control mode — show volume display in voice mode colour
+            id(control_leds_dial_touched).execute();
           } else if (id(control_mode) && (id(dial_touched) || id(center_button).state)) {
             id(control_leds_control_mode).execute();
           } else if (id(dial_touched)) {
