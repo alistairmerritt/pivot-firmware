@@ -26,7 +26,7 @@ Pivot firmware works alongside the [Pivot HA integration](https://github.com/ali
 ## Requirements
 
 - Home Assistant Voice Preview Edition (VPE)
-- **ESPHome Device Builder 2026.4.0 or later** — Pivot firmware depends on components merged into ESPHome core in this release. Older versions will fail to compile. Update the add-on before flashing.
+- **ESPHome Device Builder 2026.5.0 or later** — Pivot firmware depends on components merged into ESPHome core in this release. Older versions will fail to compile. Update the add-on before flashing.
 - The [Pivot HA integration](https://github.com/alistairmerritt/pivot-integration) installed in Home Assistant
 
 ## Quick start
