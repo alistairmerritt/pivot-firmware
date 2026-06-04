@@ -28,7 +28,7 @@ If your change touches bank switching, LED effects, or voice assistant interacti
 
 ## ESPHome version
 
-Pivot firmware requires **ESPHome Device Builder 2026.4.0 or later**. Do not introduce dependencies on ESPHome features newer than this without updating `min_version` and noting the change clearly in the PR.
+Pivot firmware requires **ESPHome Device Builder 2026.5.0 or later**. Do not introduce dependencies on ESPHome features newer than this without updating `min_version` and noting the change clearly in the PR.
 
 ## Coding style
 
