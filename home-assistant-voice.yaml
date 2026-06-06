@@ -439,6 +439,10 @@ globals:
     restore_value: yes
     initial_value: '255'  # matches bank_b_3 default
 
+  - id: bank_mirror_light_on_0
+    type: bool
+    restore_value: no
+    initial_value: 'false'
   - id: bank_mirror_light_on_1
     type: bool
     restore_value: no
