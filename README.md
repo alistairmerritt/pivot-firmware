@@ -1,138 +1,65 @@
-# Pivot — Firmware
+# Pivot Firmware
 
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-ESPHome firmware for the Home Assistant Voice Preview Edition (VPE) that turns it into a physical control knob for Home Assistant.
+Custom ESPHome firmware for the Home Assistant Voice Preview Edition (VPE) that turns it into a physical control dial for Home Assistant while preserving its core voice functionality.
 
-> **New to Pivot?** Start at the [Pivot documentation site](https://alistairmerritt.github.io/pivot) for a full getting started guide, integration setup, and troubleshooting.
-
-## Repository structure
-
-| File | What it is | Do you use it directly? |
-| --- | --- | --- |
-| `home-assistant-voice.yaml` | The full shared firmware source | **No** — ESPHome fetches this automatically |
-| `devices/example.yaml` | Minimal per-device config template | **Yes** — copy this into ESPHome for each device |
-
-**You never need to open or copy `home-assistant-voice.yaml`.** It lives here on GitHub and is pulled automatically when ESPHome compiles your device. The only file you work with is `devices/example.yaml`.
+Pivot firmware works alongside the [Pivot integration](https://github.com/alistairmerritt/pivot-integration), which handles entity provisioning and bank configuration on the Home Assistant side.
 
 ---
 
-## What is Pivot firmware?
+### Full documentation
 
-Pivot firmware extends the stock VPE firmware with four colour-coded control banks. Each bank can be assigned to a Home Assistant entity — turn the knob to adjust it, press the button to toggle it. The LED ring shows the active bank colour and control values in real time.
+**This README is a quick overview of this repository only.**
+For installation, setup, configuration, examples and troubleshooting, use the full Pivot documentation:
 
-Pivot firmware works alongside the [Pivot HA integration](https://github.com/alistairmerritt/pivot-integration), which provisions all the required entities and automation logic automatically.
+**https://alistairmerritt.github.io/pivot/**
+
+---
+
+## What this repository contains
+
+- ESPHome YAML firmware for the Home Assistant Voice Preview Edition
+- Pivot bank switching behaviour (four colour-coded control banks)
+- Rotary dial and button handling
+- LED ring feedback and colour control
+- Voice functionality preservation
+- Communication support for the Pivot HA integration
+
+For full documentation on how these components work and how to set them up, see the [Pivot documentation site](https://alistairmerritt.github.io/pivot/).
+
+## How the firmware is distributed
+
+| File | What it is | Do you use it directly? |
+| --- | --- | --- |
+| `home-assistant-voice.yaml` | Full shared firmware source | **No** — ESPHome fetches this automatically |
+| `devices/example.yaml` | Minimal per-device config template | **Yes** — copy this into ESPHome for each device |
+
+**You never need to open or copy `home-assistant-voice.yaml`.** It is fetched automatically from this repository when ESPHome compiles your device. The only file you work with is `devices/example.yaml`.
 
 ## Requirements
 
 - Home Assistant Voice Preview Edition (VPE)
 - **ESPHome Device Builder 2026.5.0 or later** — Pivot firmware depends on components merged into ESPHome core in this release. Older versions will fail to compile. Update the add-on before flashing.
-- The [Pivot HA integration](https://github.com/alistairmerritt/pivot-integration) installed in Home Assistant
+- The [Pivot integration](https://github.com/alistairmerritt/pivot-integration) installed in Home Assistant
 
-## Quick start
+## Installation
 
-1. **Copy `devices/example.yaml`** into your ESPHome dashboard as a new device
-2. Fill in your device-specific values (name, suffix, WiFi, API key)
-3. Click **Install → Wirelessly** — or via USB for the very first flash
-4. After the first flash, **disconnect the VPE from power, wait a few seconds, then reconnect**
-5. Add the device to Home Assistant via the ESPHome integration
-6. Install the [Pivot HA integration](https://github.com/alistairmerritt/pivot-integration) and add your device
+Firmware flashing and full setup instructions are covered in the Pivot documentation:
 
-ESPHome fetches `home-assistant-voice.yaml` from GitHub automatically at compile time — you don't need to touch it. When a new version of Pivot firmware is released, just hit **Install** in ESPHome and it pulls the latest.
+https://alistairmerritt.github.io/pivot/firmware/
 
-> **Note:** HA's Updates page (Settings → Updates) will notify you of new Pivot **integration** releases via HACS, but not firmware changes. Firmware updates are always initiated manually from ESPHome Device Builder. Check the [changelog](https://alistairmerritt.github.io/pivot/changelog/) to see what's changed.
+For a full getting started guide covering both firmware and integration setup, see:
 
-## Per-device configuration (`devices/example.yaml`)
-
-This is everything you need per device. Fill in your values and paste it into ESPHome:
-
-```yaml
-substitutions:
-  # =======================================================================
-  # PIVOT DEVICE CONFIGURATION — fill in these values for each device
-  # =======================================================================
-
-  # ESPHome device name (slug, no spaces or dashes)
-  device_name: home_assistant_voice_lounge
-
-  # Friendly name shown in HA and ESPHome
-  device_friendly_name: Lounge VPE
-
-  # Pivot device suffix — unique per device, no spaces or dashes
-  # Must match exactly what you enter in the Pivot integration
-  device_suffix: ha_voice_lounge
-
-  # WiFi credentials — add these lines to your ESPHome secrets.yaml:
-  #   wifi_ssid: "Your Network Name"
-  #   wifi_password: "Your Password"
-  wifi_ssid: !secret wifi_ssid
-  wifi_password: !secret wifi_password
-
-  # API encryption key — generate a unique one per device at:
-  # https://esphome.io/components/api.html#configuration-variables
-  api_encryption_key: "generate-a-unique-key-here"
-
-  # LED orientation — set based on how your device is mounted:
-  #   '6'  flat on a surface, cable facing away (LEDs start at bottom)
-  #   '0'  upright on a stand, cable at the bottom (LEDs start at top)
-  led_offset: '6'
-
-  # =======================================================================
-
-packages:
-  pivot:
-    url: https://github.com/alistairmerritt/pivot-firmware
-    ref: main
-    file: home-assistant-voice.yaml
-    refresh: 1d
-```
-
-### `device_suffix`
-
-The most important field. Must be unique across all your Pivot devices, lowercase with no spaces or dashes (underscores are fine), and identical to what you enter in the Pivot integration setup. It determines all entity IDs — e.g. `ha_voice_lounge` produces `number.ha_voice_lounge_active_bank`, `text.ha_voice_lounge_bank_1_entity`, etc.
-
-### `led_offset`
-
-Set to `'6'` if your device is flat on a surface with the cable facing away from you. Set to `'0'` if it is upright on a stand with the cable at the bottom. This controls which physical LED is position 0 on the ring so bank colours and gauges appear in the correct position relative to how you're looking at it.
-
-### Before you flash — note these down
-
-| Value | Where it's used |
-| --- | --- |
-| `device_suffix` | Required when adding your device in the Pivot integration |
-| `api_encryption_key` | Required if you ever need to re-add the device to Home Assistant |
-
-## Multiple devices
-
-Each VPE gets its own copy of `devices/example.yaml` in ESPHome with a unique `device_suffix`. The shared firmware is pulled from GitHub automatically — no copying or maintaining separate full YAML files per device.
-
-| Device | `device_suffix` |
-| --- | --- |
-| Lounge VPE | `ha_voice_lounge` |
-| Bedroom VPE | `ha_voice_bedroom` |
-| Study VPE | `ha_voice_study` |
-
-## Bank colours
-
-Default LED colours per bank. These can be changed from within Home Assistant using the bank colour light entities created by the integration.
-
-| Bank | Default Colour |
-| --- | --- |
-| 1 | Blue `#2889FF` |
-| 2 | Orange `#FF7D19` |
-| 3 | Green `#97FF3D` |
-| 4 | Purple `#C800FF` |
-
-## Full documentation
-
-For a full getting started guide, integration setup, and troubleshooting see the [Pivot documentation site](https://alistairmerritt.github.io/pivot).
-
-## Related repositories
-
-- [pivot-integration](https://github.com/alistairmerritt/pivot-integration) — HACS integration for Home Assistant
-- [pivot docs](https://alistairmerritt.github.io/pivot/) — documentation site
+https://alistairmerritt.github.io/pivot/getting-started/
 
 ---
+
+## Related links
+
+- [Pivot documentation](https://alistairmerritt.github.io/pivot/) — installation, setup, examples and troubleshooting
+- [Pivot project page](https://madewithmerritt.com/pivot/) — hardware overview and demonstrations
+- [Pivot integration](https://github.com/alistairmerritt/pivot-integration) — HACS integration for Home Assistant
 
 ## License
 
