@@ -47,10 +47,6 @@ For full documentation on how these components work and how to set them up, see 
 
 Firmware flashing and full setup instructions are covered in the Pivot documentation:
 
-https://alistairmerritt.github.io/pivot/firmware/
-
-For a full getting started guide covering both firmware and integration setup, see:
-
 https://alistairmerritt.github.io/pivot/getting-started/
 
 ---
