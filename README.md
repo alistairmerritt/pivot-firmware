@@ -30,7 +30,7 @@ For full documentation on how these components work and how to set them up, see 
 
 ## How the firmware is distributed
 
-| File | What it is | Do you use it directly? |
+| File | What it is | Should I use it directly? |
 | --- | --- | --- |
 | `home-assistant-voice.yaml` | Full shared firmware source | **No** — ESPHome fetches this automatically |
 | `devices/example.yaml` | Minimal per-device config template | **Yes** — copy this into ESPHome for each device |
