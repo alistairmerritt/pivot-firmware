@@ -184,6 +184,49 @@ api:
     - script.execute: control_leds
   on_client_disconnected:
     - script.execute: control_leds
+  actions:
+    # Explicit settings push from the Pivot integration.
+    # The HA ESPHome integration only forwards genuine state *changes* to
+    # subscribed homeassistant sensors — entity-addition events and
+    # same-state writes are dropped. If this device connects and subscribes
+    # before the Pivot entities are restored (typical during HA startup),
+    # their values are never delivered and the settings globals stay stale
+    # until the user toggles something. The integration calls this action
+    # once HA has fully started so the globals are correct regardless of
+    # connection/restore ordering.
+    # Bank variables are 1-based (matching entity names); globals are 0-based.
+    - action: pivot_sync_settings
+      variables:
+        control_mode_in: bool
+        show_control_value_in: bool
+        dim_when_idle_in: bool
+        bank_mirror_1_in: bool
+        bank_mirror_2_in: bool
+        bank_mirror_3_in: bool
+        bank_mirror_4_in: bool
+        bank_passive_1_in: bool
+        bank_passive_2_in: bool
+        bank_passive_3_in: bool
+        bank_passive_4_in: bool
+      then:
+        - lambda: |-
+            id(control_mode) = control_mode_in;
+            id(show_control_value) = show_control_value_in;
+            id(dim_when_idle) = dim_when_idle_in;
+            if (!dim_when_idle_in) {
+              // Feature off — ensure LEDs are not left dimmed
+              id(led_is_idle) = false;
+            }
+            id(bank_mirror_0) = bank_mirror_1_in;
+            id(bank_mirror_1) = bank_mirror_2_in;
+            id(bank_mirror_2) = bank_mirror_3_in;
+            id(bank_mirror_3) = bank_mirror_4_in;
+            id(bank_passive_0) = bank_passive_1_in;
+            id(bank_passive_1) = bank_passive_2_in;
+            id(bank_passive_2) = bank_passive_3_in;
+            id(bank_passive_3) = bank_passive_4_in;
+        - script.execute: set_mode_led_color
+        - script.execute: control_leds
   encryption:
     key: ${api_encryption_key}
 ota:
