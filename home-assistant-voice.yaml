@@ -145,24 +145,41 @@ api:
     - script.execute: set_mode_led_color
     - script.execute: control_leds
     - lambda: |-
-        id(bank_passive_0) = id(ha_bank_passive_0).state;
-        id(bank_passive_1) = id(ha_bank_passive_1).state;
-        id(bank_passive_2) = id(ha_bank_passive_2).state;
-        id(bank_passive_3) = id(ha_bank_passive_3).state;
+        // has_state() guards: only adopt values HA has actually sent since
+        // boot so a subscription that has not delivered yet cannot clobber
+        // NVS-restored globals with sensor defaults.
+        if (id(ha_bank_passive_0).has_state()) id(bank_passive_0) = id(ha_bank_passive_0).state;
+        if (id(ha_bank_passive_1).has_state()) id(bank_passive_1) = id(ha_bank_passive_1).state;
+        if (id(ha_bank_passive_2).has_state()) id(bank_passive_2) = id(ha_bank_passive_2).state;
+        if (id(ha_bank_passive_3).has_state()) id(bank_passive_3) = id(ha_bank_passive_3).state;
     # Re-sync all display-affecting state after a short delay.
     # on_state callbacks for homeassistant binary sensors only fire when the value
     # changes — if HA restores the same value the firmware had cached, the callback
     # is skipped and the initial control_leds run above may be based on stale
     # NVS/in-memory values. After 2 s HA has finished pushing all entity states,
     # so we explicitly re-read and re-render to guarantee the LEDs are correct.
+    # This must cover EVERY setting global fed by a homeassistant binary sensor —
+    # dim_when_idle and the bank_mirror flags were previously missing, which left
+    # them stale after a restart until the user toggled them in HA.
     - delay: 2s
     - lambda: |-
-        id(control_mode) = id(ha_control_mode).state;
-        id(show_control_value) = id(ha_show_control_value).state;
-        id(bank_passive_0) = id(ha_bank_passive_0).state;
-        id(bank_passive_1) = id(ha_bank_passive_1).state;
-        id(bank_passive_2) = id(ha_bank_passive_2).state;
-        id(bank_passive_3) = id(ha_bank_passive_3).state;
+        if (id(ha_control_mode).has_state()) id(control_mode) = id(ha_control_mode).state;
+        if (id(ha_show_control_value).has_state()) id(show_control_value) = id(ha_show_control_value).state;
+        if (id(ha_dim_when_idle).has_state()) {
+          id(dim_when_idle) = id(ha_dim_when_idle).state;
+          if (!id(dim_when_idle)) {
+            // Feature off — ensure LEDs are not left dimmed
+            id(led_is_idle) = false;
+          }
+        }
+        if (id(ha_bank_mirror_0).has_state()) id(bank_mirror_0) = id(ha_bank_mirror_0).state;
+        if (id(ha_bank_mirror_1).has_state()) id(bank_mirror_1) = id(ha_bank_mirror_1).state;
+        if (id(ha_bank_mirror_2).has_state()) id(bank_mirror_2) = id(ha_bank_mirror_2).state;
+        if (id(ha_bank_mirror_3).has_state()) id(bank_mirror_3) = id(ha_bank_mirror_3).state;
+        if (id(ha_bank_passive_0).has_state()) id(bank_passive_0) = id(ha_bank_passive_0).state;
+        if (id(ha_bank_passive_1).has_state()) id(bank_passive_1) = id(ha_bank_passive_1).state;
+        if (id(ha_bank_passive_2).has_state()) id(bank_passive_2) = id(ha_bank_passive_2).state;
+        if (id(ha_bank_passive_3).has_state()) id(bank_passive_3) = id(ha_bank_passive_3).state;
     - script.execute: set_mode_led_color
     - script.execute: control_leds
   on_client_disconnected:
