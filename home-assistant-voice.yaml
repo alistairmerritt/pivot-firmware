@@ -2945,19 +2945,50 @@ button:
     icon: "mdi:restart"
 
   # --- TEMP: local value-announcement sequencing test (remove after verifying) ---
-  # Press in HA; should say "Brightness forty seven percent" as one clean sentence.
-  # Fires all four clips back-to-back to check whether the media player queues
-  # announcements gaplessly (vs. only playing the last, or with gaps).
+  # Both should say "Brightness forty seven percent". Tell me which sounds better.
+  #
+  # Test A (enqueue): builds an announcement playlist with 0 ms gap — should be
+  # gapless if the player honours the ENQUEUE command. This is the one we want.
   - platform: template
-    name: "Pivot announce test"
+    name: "Pivot announce test A enqueue"
     entity_category: diagnostic
     on_press:
       - lambda: |-
           auto mp = id(external_media_player);
+          mp->set_playlist_delay_ms(1, 0);  // announcement pipeline, 0 ms between items
           mp->make_call().set_media_url("audio-file://ann_prefix_brightness").set_announcement(true).perform();
-          mp->make_call().set_media_url("audio-file://ann_num_40").set_announcement(true).perform();
-          mp->make_call().set_media_url("audio-file://ann_num_7").set_announcement(true).perform();
-          mp->make_call().set_media_url("audio-file://ann_unit_percent").set_announcement(true).perform();
+          mp->make_call().set_command(media_player::MEDIA_PLAYER_COMMAND_ENQUEUE).set_media_url("audio-file://ann_num_40").set_announcement(true).perform();
+          mp->make_call().set_command(media_player::MEDIA_PLAYER_COMMAND_ENQUEUE).set_media_url("audio-file://ann_num_7").set_announcement(true).perform();
+          mp->make_call().set_command(media_player::MEDIA_PLAYER_COMMAND_ENQUEUE).set_media_url("audio-file://ann_unit_percent").set_announcement(true).perform();
+
+  # Test B (sequential): plays each clip, waits for it to finish, then the next.
+  # Guaranteed to play all four words, but may have small gaps between them.
+  - platform: template
+    name: "Pivot announce test B sequential"
+    entity_category: diagnostic
+    on_press:
+      - lambda: id(external_media_player)->make_call().set_media_url("audio-file://ann_prefix_brightness").set_announcement(true).perform();
+      - wait_until:
+          condition: {media_player.is_announcing: external_media_player}
+          timeout: 1s
+      - wait_until:
+          condition: {not: {media_player.is_announcing: external_media_player}}
+          timeout: 3s
+      - lambda: id(external_media_player)->make_call().set_media_url("audio-file://ann_num_40").set_announcement(true).perform();
+      - wait_until:
+          condition: {media_player.is_announcing: external_media_player}
+          timeout: 1s
+      - wait_until:
+          condition: {not: {media_player.is_announcing: external_media_player}}
+          timeout: 3s
+      - lambda: id(external_media_player)->make_call().set_media_url("audio-file://ann_num_7").set_announcement(true).perform();
+      - wait_until:
+          condition: {media_player.is_announcing: external_media_player}
+          timeout: 1s
+      - wait_until:
+          condition: {not: {media_player.is_announcing: external_media_player}}
+          timeout: 3s
+      - lambda: id(external_media_player)->make_call().set_media_url("audio-file://ann_unit_percent").set_announcement(true).perform();
 
 debug:
   update_interval: 5s
