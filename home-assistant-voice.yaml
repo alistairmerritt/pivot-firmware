@@ -74,6 +74,13 @@ substitutions:
   easter_egg_tada_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/easter_egg_tada.mp3
   error_cloud_expired_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/error_cloud_expired.mp3
 
+  # --- TEMP: local value-announcement sequencing test (remove after verifying) ---
+  ann_base: https://github.com/alistairmerritt/pivot-firmware/raw/feature/local-value-announcements/sounds/announcements
+  prefix_brightness_file: ${ann_base}/prefix_brightness.flac
+  num_40_file: ${ann_base}/num_40.flac
+  num_7_file: ${ann_base}/num_7.flac
+  unit_percent_file: ${ann_base}/unit_percent.flac
+
 esphome:
   name: ${device_name}
   friendly_name: ${device_friendly_name}
@@ -2626,6 +2633,15 @@ audio_file:
     file: ${easter_egg_tada_sound_file}
   - id: error_cloud_expired
     file: ${error_cloud_expired_sound_file}
+  # --- TEMP: local value-announcement sequencing test (remove after verifying) ---
+  - id: ann_prefix_brightness
+    file: ${prefix_brightness_file}
+  - id: ann_num_40
+    file: ${num_40_file}
+  - id: ann_num_7
+    file: ${num_7_file}
+  - id: ann_unit_percent
+    file: ${unit_percent_file}
 
 media_source:
   - platform: audio_file
@@ -2927,6 +2943,21 @@ button:
     entity_category: config
     disabled_by_default: true
     icon: "mdi:restart"
+
+  # --- TEMP: local value-announcement sequencing test (remove after verifying) ---
+  # Press in HA; should say "Brightness forty seven percent" as one clean sentence.
+  # Fires all four clips back-to-back to check whether the media player queues
+  # announcements gaplessly (vs. only playing the last, or with gaps).
+  - platform: template
+    name: "Pivot announce test"
+    entity_category: diagnostic
+    on_press:
+      - lambda: |-
+          auto mp = id(external_media_player);
+          mp->make_call().set_media_url("audio-file://ann_prefix_brightness").set_announcement(true).perform();
+          mp->make_call().set_media_url("audio-file://ann_num_40").set_announcement(true).perform();
+          mp->make_call().set_media_url("audio-file://ann_num_7").set_announcement(true).perform();
+          mp->make_call().set_media_url("audio-file://ann_unit_percent").set_announcement(true).perform();
 
 debug:
   update_interval: 5s
