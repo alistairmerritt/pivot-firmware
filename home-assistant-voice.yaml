@@ -2700,12 +2700,16 @@ voice_kit:
     version: "1.3.1"
     md5: 964635c5bf125529dab14a2472a15401
 
-# Sendspin related components are pinned to specific commits for reproducible builds
+# Pinned to a specific commit for reproducible builds. `ref: dev` tracked a moving
+# branch, so voice_kit could change between builds with no version change here —
+# which is how an upstream regression can arrive unannounced. Bump this SHA
+# deliberately when adopting upstream changes.
+# 0579e7b = dev @ 2026-07-07 ("Switch to lock buttons", #428)
 external_components:
   - source:
       type: git
       url: https://github.com/esphome/home-assistant-voice-pe
-      ref: dev
+      ref: 0579e7b9d8504264719c593474c85447253c9dc1
     components:
       - voice_kit
     refresh: 0s
