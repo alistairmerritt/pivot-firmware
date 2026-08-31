@@ -35,6 +35,14 @@ substitutions:
   # https://esphome.io/components/api.html#configuration-variables
   api_encryption_key: "generate-a-unique-key-here"
 
+  # OTA update password — REQUIRED, and unique per device.
+  # Without this anyone who can reach the device on your network can replace
+  # its firmware. Generate one with:  openssl rand -hex 16
+  # Then add it to your ESPHome secrets.yaml, e.g.:
+  #   pivot_ota_lounge: "a1b2c3..."
+  # Keep a copy — losing it means recovery requires a USB flash.
+  ota_password: !secret pivot_ota_lounge
+
   # LED orientation — set based on how your device is mounted:
   #   '6'  flat on a surface, cable facing away (LEDs start at bottom)
   #   '0'  upright on a stand, cable at the bottom (LEDs start at top)

@@ -31,6 +31,11 @@ substitutions:
   # https://esphome.io/components/api.html#configuration-variables
   api_encryption_key: "your_generated_key_here"
 
+  # OTA update password — MUST be overridden per device. This sentinel default
+  # exists only so a missing value is caught: the build-time guard in on_boot
+  # below fails the compile if it survives. See SECURITY.md.
+  ota_password: "PIVOT_UNSET_OTA_PASSWORD"
+
   # LED orientation — set based on how your device is mounted:
   #   flat:    cable faces away, device is flat on a surface (LEDs start at bottom)
   #   upright: cable faces down, device is on a stand (LEDs start at top)
@@ -57,22 +62,25 @@ substitutions:
   # Change this to true in case you have a hidden SSID at home.
   hidden_ssid: "false"
   # Substitutions for audio files
-  jack_connected_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/jack_connected.flac
-  jack_disconnected_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/jack_disconnected.flac
-  mute_switch_on_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/mute_switch_on.flac
-  mute_switch_off_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/mute_switch_off.flac
-  timer_finished_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/timer_finished.flac
-  wake_word_triggered_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/wake_word_triggered.flac
-  center_button_press_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/center_button_press.flac
-  center_button_double_press_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/center_button_double_press.flac
-  center_button_triple_press_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/center_button_triple_press.flac
-  center_button_long_press_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/center_button_long_press.flac
-  factory_reset_initiated_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/factory_reset_initiated.mp3
-  factory_reset_cancelled_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/factory_reset_cancelled.mp3
-  factory_reset_confirmed_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/factory_reset_confirmed.mp3
-  easter_egg_tick_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/easter_egg_tick.mp3
-  easter_egg_tada_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/easter_egg_tada.mp3
-  error_cloud_expired_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/error_cloud_expired.mp3
+  # Upstream sound assets, pinned to the same commit as the voice_kit
+  # external component below. `dev` is a moving branch: builds from it
+  # were not reproducible.
+  jack_connected_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/jack_connected.flac
+  jack_disconnected_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/jack_disconnected.flac
+  mute_switch_on_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/mute_switch_on.flac
+  mute_switch_off_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/mute_switch_off.flac
+  timer_finished_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/timer_finished.flac
+  wake_word_triggered_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/wake_word_triggered.flac
+  center_button_press_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/center_button_press.flac
+  center_button_double_press_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/center_button_double_press.flac
+  center_button_triple_press_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/center_button_triple_press.flac
+  center_button_long_press_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/center_button_long_press.flac
+  factory_reset_initiated_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/factory_reset_initiated.mp3
+  factory_reset_cancelled_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/factory_reset_cancelled.mp3
+  factory_reset_confirmed_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/factory_reset_confirmed.mp3
+  easter_egg_tick_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/easter_egg_tick.mp3
+  easter_egg_tada_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/easter_egg_tada.mp3
+  error_cloud_expired_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/error_cloud_expired.mp3
 
 esphome:
   name: ${device_name}
@@ -80,20 +88,41 @@ esphome:
   name_add_mac_suffix: false
   min_version: 2026.5.0
   on_boot:
-    priority: 375
-    then:
-      # Run the script to refresh the LED status
-      - script.execute: control_leds
-      - delay: 1s
-      - switch.turn_on: internal_speaker_amp
-      # If after 10 minutes, the device is still initializing (It did not yet connect to Home Assistant), turn off the init_in_progress variable and run the script to refresh the LED status
-      - delay: 10min
-      - if:
-          condition:
-            lambda: return id(init_in_progress);
-          then:
-            - lambda: id(init_in_progress) = false;
-            - script.execute: control_leds
+    # LIST form (a list of automations), not a single mapping. ESPHome merges
+    # packages by recursively merging mappings and CONCATENATING lists. In
+    # mapping form, a user's own on_boot actions were appended to the end of
+    # THIS automation's `then:` — i.e. after the 10-minute delay below, which
+    # silently broke the documented OTA password rotation. List form keeps a
+    # user's automation separate, with its own priority.
+    - priority: 375
+      then:
+        # Build-time guard, not a runtime check: this fails the COMPILE if
+        # ota_password was never set for this device. ESPHome does not validate
+        # the OTA password (an unset substitution passes through as a literal,
+        # and an empty string is accepted), so without this a device could ship
+        # with firmware anyone on the LAN can replace. See SECURITY.md.
+        - lambda: |-
+            static_assert(
+              __builtin_strcmp("${ota_password}", "PIVOT_UNSET_OTA_PASSWORD") != 0,
+              "Set a unique ota_password in your device YAML - see SECURITY.md");
+            // sizeof a string literal is length + 1, so >= 13 means >= 12 chars.
+            // This also catches ota_password: "" — ESPHome accepts an empty
+            // password and then serves OTA with no authentication at all.
+            static_assert(
+              sizeof("${ota_password}") >= 13,
+              "ota_password must be at least 12 characters - see SECURITY.md");
+        # Run the script to refresh the LED status
+        - script.execute: control_leds
+        - delay: 1s
+        - switch.turn_on: internal_speaker_amp
+        # If after 10 minutes, the device is still initializing (It did not yet connect to Home Assistant), turn off the init_in_progress variable and run the script to refresh the LED status
+        - delay: 10min
+        - if:
+            condition:
+              lambda: return id(init_in_progress);
+            then:
+              - lambda: id(init_in_progress) = false;
+              - script.execute: control_leds
 
 esp32:
   board: esp32-s3-devkitc-1
@@ -186,14 +215,23 @@ api:
     - script.execute: control_leds
   actions:
     # Explicit settings push from the Pivot integration.
+    #
     # The HA ESPHome integration only forwards genuine state *changes* to
-    # subscribed homeassistant sensors — entity-addition events and
-    # same-state writes are dropped. If this device connects and subscribes
-    # before the Pivot entities are restored (typical during HA startup),
-    # their values are never delivered and the settings globals stay stale
-    # until the user toggles something. The integration calls this action
-    # once HA has fully started so the globals are correct regardless of
-    # connection/restore ordering.
+    # subscribed homeassistant sensors — entity-addition events and same-state
+    # writes are dropped, and nothing is sent at all if the entity does not
+    # exist yet when the device subscribes. If this device connects and
+    # subscribes before the Pivot entities are restored (typical during HA
+    # startup), their values are never delivered and settings stay stale until
+    # the user toggles something. The integration calls these actions so the
+    # globals are correct regardless of connection/restore ordering.
+    #
+    # TWO VERSIONS ARE PUBLISHED ON PURPOSE. An ESPHome action requires every
+    # declared argument, so changing this signature in place would break both
+    # mixed-version combinations — HACS and ESPHome update independently, so
+    # that WILL happen in the field. v1 keeps its original 11-argument
+    # signature forever; new state goes in v2. The integration calls v2 and
+    # falls back to v1.
+    #
     # Bank variables are 1-based (matching entity names); globals are 0-based.
     - action: pivot_sync_settings
       variables:
@@ -227,11 +265,107 @@ api:
             id(bank_passive_3) = bank_passive_4_in;
         - script.execute: set_mode_led_color
         - script.execute: control_leds
+
+    # v2 — everything in v1, plus the state that is also fed by change-only
+    # subscriptions and goes stale the same way: active bank, per-bank values,
+    # displayed colours, and the configured identity colours used by the Bank
+    # Indicator.
+    - action: pivot_sync_settings_v2
+      variables:
+        control_mode_in: bool
+        show_control_value_in: bool
+        dim_when_idle_in: bool
+        bank_mirror_1_in: bool
+        bank_mirror_2_in: bool
+        bank_mirror_3_in: bool
+        bank_mirror_4_in: bool
+        bank_passive_1_in: bool
+        bank_passive_2_in: bool
+        bank_passive_3_in: bool
+        bank_passive_4_in: bool
+        active_bank_in: int
+        bank_value_1_in: float
+        bank_value_2_in: float
+        bank_value_3_in: float
+        bank_value_4_in: float
+        bank_color_1_in: string
+        bank_color_2_in: string
+        bank_color_3_in: string
+        bank_color_4_in: string
+        bank_configured_color_1_in: string
+        bank_configured_color_2_in: string
+        bank_configured_color_3_in: string
+        bank_configured_color_4_in: string
+      then:
+        - lambda: |-
+            id(control_mode) = control_mode_in;
+            id(show_control_value) = show_control_value_in;
+            id(dim_when_idle) = dim_when_idle_in;
+            if (!dim_when_idle_in) {
+              // Feature off — ensure LEDs are not left dimmed
+              id(led_is_idle) = false;
+            }
+            id(bank_mirror_0) = bank_mirror_1_in;
+            id(bank_mirror_1) = bank_mirror_2_in;
+            id(bank_mirror_2) = bank_mirror_3_in;
+            id(bank_mirror_3) = bank_mirror_4_in;
+            id(bank_passive_0) = bank_passive_1_in;
+            id(bank_passive_1) = bank_passive_2_in;
+            id(bank_passive_2) = bank_passive_3_in;
+            id(bank_passive_3) = bank_passive_4_in;
+
+            // Skipped while the user is actively turning the dial, so a push
+            // landing mid-turn cannot fight the knob.
+            if (!id(bank_updating)) {
+              int ab = active_bank_in - 1;  // HA is 1-based, firmware 0-based
+              if (ab >= 0 && ab <= 3) id(active_bank) = ab;
+
+              id(bank_value_0) = bank_value_1_in;
+              id(bank_value_1) = bank_value_2_in;
+              id(bank_value_2) = bank_value_3_in;
+              id(bank_value_3) = bank_value_4_in;
+
+              auto hval = [](char c) -> int {
+                if (c >= '0' && c <= '9') return c - '0';
+                if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+                if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+                return 0;
+              };
+              auto apply_hex = [&hval](const std::string &hex,
+                                       int &r, int &g, int &b) {
+                if (hex.size() == 7 && hex[0] == '#') {
+                  r = (hval(hex[1]) << 4) | hval(hex[2]);
+                  g = (hval(hex[3]) << 4) | hval(hex[4]);
+                  b = (hval(hex[5]) << 4) | hval(hex[6]);
+                }
+              };
+              // Displayed colour (mirror colour when mirroring, else configured)
+              apply_hex(bank_color_1_in, id(bank_r_0), id(bank_g_0), id(bank_b_0));
+              apply_hex(bank_color_2_in, id(bank_r_1), id(bank_g_1), id(bank_b_1));
+              apply_hex(bank_color_3_in, id(bank_r_2), id(bank_g_2), id(bank_b_2));
+              apply_hex(bank_color_4_in, id(bank_r_3), id(bank_g_3), id(bank_b_3));
+              // Configured identity colour, used by the Bank Indicator
+              apply_hex(bank_configured_color_1_in,
+                        id(bank_mirror_r_0), id(bank_mirror_g_0), id(bank_mirror_b_0));
+              apply_hex(bank_configured_color_2_in,
+                        id(bank_mirror_r_1), id(bank_mirror_g_1), id(bank_mirror_b_1));
+              apply_hex(bank_configured_color_3_in,
+                        id(bank_mirror_r_2), id(bank_mirror_g_2), id(bank_mirror_b_2));
+              apply_hex(bank_configured_color_4_in,
+                        id(bank_mirror_r_3), id(bank_mirror_g_3), id(bank_mirror_b_3));
+            }
+        - script.execute: set_mode_led_color
+        - script.execute: control_leds
   encryption:
     key: ${api_encryption_key}
 ota:
   - platform: esphome
     id: ota_esphome
+    # The substitution above defaults to a sentinel, not to a usable password:
+    # there is deliberately no working default. The on_boot guard rejects that
+    # sentinel, an empty value, and anything under 12 characters, so a device
+    # cannot ship with firmware anyone on the LAN can replace. See SECURITY.md.
+    password: ${ota_password}
 
 i2c:
   - id: internal_i2c
@@ -728,11 +862,10 @@ binary_sensor:
               then:
                 - lambda: id(control_mode) = !id(control_mode);
                 - script.execute: set_mode_led_color
-                - script.execute:
-                    id: play_sound
-                    priority: false
-                    sound_file: "center_button_double_press_sound"
-                - delay: 1200ms
+                # Report to HA immediately, BEFORE the sound delay. The
+                # integration gates knob events on HA's copy of control_mode,
+                # so deferring this by 1.2 s silently dropped any dial turn
+                # made in the moment right after switching mode.
                 - if:
                     condition:
                       lambda: return id(control_mode);
@@ -746,6 +879,11 @@ binary_sensor:
                           action: switch.turn_off
                           data:
                             entity_id: switch.${device_suffix}_control_mode
+                - script.execute:
+                    id: play_sound
+                    priority: false
+                    sound_file: "center_button_double_press_sound"
+                - delay: 1200ms
                 - lambda: id(button_press_event).trigger("double_press");
       # Triple Click
       #  . Exposed as an event entity. To be used in automations inside Home Assistant
@@ -1842,18 +1980,26 @@ sensor:
     entity_id: number.${device_suffix}_active_bank
     on_value:
       then:
-        - lambda: |
-            int bank = (int)round(x) - 1;  // HA is 1-based, firmware is 0-based
-            if (bank >= 0 && bank <= 3 && bank != id(active_bank)) {
-              id(active_bank) = bank;
-              id(bank_display_active) = true;
-              id(last_interaction_ms) = millis();
-              id(led_is_idle) = false;
-              id(control_leds).execute();
-            }
-        - delay: 750ms
-        - lambda: id(bank_display_active) = false;
-        - script.execute: control_leds
+        # Guard the whole sequence, not just the assignment. bank_switch now
+        # reports to HA immediately, so this trigger also fires as an echo of
+        # the device's own write — and the unconditional teardown below used to
+        # clear bank_display_active 750 ms in, cutting the indicator short.
+        - if:
+            condition:
+              lambda: |-
+                int bank = (int)round(x) - 1;  // HA is 1-based, firmware 0-based
+                return bank >= 0 && bank <= 3 && bank != id(active_bank);
+            then:
+              - lambda: |
+                  int bank = (int)round(x) - 1;
+                  id(active_bank) = bank;
+                  id(bank_display_active) = true;
+                  id(last_interaction_ms) = millis();
+                  id(led_is_idle) = false;
+                  id(control_leds).execute();
+              - delay: 750ms
+              - lambda: id(bank_display_active) = false;
+              - script.execute: control_leds
 
 
 interval:
@@ -2405,6 +2551,11 @@ script:
                   case 3: id(bank_value_3) = next; break;
                 }
             - script.execute: control_leds
+            # Debounce the outbound write. LEDs above already gave immediate
+            # local feedback; `mode: restart` means a fast spin cancels this
+            # delay so only the final value reaches HA, rather than one
+            # service call per detent flooding the API.
+            - delay: 150ms
             - if:
                 condition:
                   lambda: return id(active_bank) == 0;
@@ -2446,12 +2597,16 @@ script:
                       data_template:
                         value: !lambda return id(bank_value_3);
             - delay: 1s
-            - lambda: id(dial_touched) = false;
-            - lambda: id(bank_updating) = false;
-            - sensor.rotary_encoder.set_value:
-                id: dial
-                value: 0
-            - script.execute: control_leds
+      # Common cleanup — MUST run on both branches. The passive branch used to
+      # fall through without clearing dial_touched, which left the centre
+      # button (and therefore the voice assistant), long press and factory
+      # reset suppressed until an unrelated dial action or a reboot.
+      - lambda: id(dial_touched) = false;
+      - lambda: id(bank_updating) = false;
+      - sensor.rotary_encoder.set_value:
+          id: dial
+          value: 0
+      - script.execute: control_leds
 
   # Switch active bank (hold + turn in control mode)
   - id: bank_switch
@@ -2467,6 +2622,17 @@ script:
           }
           id(bank_display_active) = true;
       - script.execute: control_leds
+      # Report to HA immediately. The integration drops a knob event whose bank
+      # does not match HA's active_bank, so publishing this only after the
+      # indicator delay (plus any button hold) lost the first turn after a
+      # bank switch. Not debounced: bank switches need the button held, so
+      # they are inherently low-frequency.
+      - homeassistant.action:
+          action: number.set_value
+          data:
+            entity_id: number.${device_suffix}_active_bank
+          data_template:
+            value: !lambda return (float)(id(active_bank) + 1);
       - delay: 1200ms
       - if:
           condition:
@@ -2480,12 +2646,6 @@ script:
       - sensor.rotary_encoder.set_value:
           id: dial
           value: 0
-      - homeassistant.action:
-          action: number.set_value
-          data:
-            entity_id: number.${device_suffix}_active_bank
-          data_template:
-            value: !lambda return (float)(id(active_bank) + 1);
       - script.execute: control_leds
 
   - id: control_leds_control_mode

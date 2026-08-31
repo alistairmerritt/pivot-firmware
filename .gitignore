@@ -1,0 +1,10 @@
+# macOS
+.DS_Store
+
+# ESPHome build output
+.esphome/
+*.bin
+
+# Local secrets — NEVER commit. Holds wifi credentials, API encryption keys
+# and (since OTA is now password-protected) per-device OTA passwords.
+secrets.yaml
