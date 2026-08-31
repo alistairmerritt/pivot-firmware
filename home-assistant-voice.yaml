@@ -469,6 +469,14 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
+  # Which bank the debounced outbound write belongs to. Snapshotted when the
+  # knob is turned, because active_bank can change during the debounce delay
+  # (hold-and-turn runs bank_switch, a separate script) and the write would
+  # otherwise be sent to whichever bank happened to be active when it fired.
+  - id: pending_write_bank
+    type: int
+    restore_value: no
+    initial_value: '0'
   # Flag to temporarily show bank indicator LEDs after a bank switch
   - id: bank_display_active
     type: bool
@@ -2550,6 +2558,8 @@ script:
                   case 2: id(bank_value_2) = next; break;
                   case 3: id(bank_value_3) = next; break;
                 }
+                // Pin the target before the debounce delay below.
+                id(pending_write_bank) = id(active_bank);
             - script.execute: control_leds
             # Debounce the outbound write. LEDs above already gave immediate
             # local feedback; `mode: restart` means a fast spin cancels this
@@ -2558,7 +2568,7 @@ script:
             - delay: 150ms
             - if:
                 condition:
-                  lambda: return id(active_bank) == 0;
+                  lambda: return id(pending_write_bank) == 0;
                 then:
                   - homeassistant.action:
                       action: number.set_value
@@ -2568,7 +2578,7 @@ script:
                         value: !lambda return id(bank_value_0);
             - if:
                 condition:
-                  lambda: return id(active_bank) == 1;
+                  lambda: return id(pending_write_bank) == 1;
                 then:
                   - homeassistant.action:
                       action: number.set_value
@@ -2578,7 +2588,7 @@ script:
                         value: !lambda return id(bank_value_1);
             - if:
                 condition:
-                  lambda: return id(active_bank) == 2;
+                  lambda: return id(pending_write_bank) == 2;
                 then:
                   - homeassistant.action:
                       action: number.set_value
@@ -2588,7 +2598,7 @@ script:
                         value: !lambda return id(bank_value_2);
             - if:
                 condition:
-                  lambda: return id(active_bank) == 3;
+                  lambda: return id(pending_write_bank) == 3;
                 then:
                   - homeassistant.action:
                       action: number.set_value
