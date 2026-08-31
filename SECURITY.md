@@ -18,8 +18,8 @@ Both are **required**. There is no usable default for either.
 ESPHome does not validate the OTA password, so a missing one fails quietly:
 an unset substitution passes through as the literal string `${ota_password}`,
 and an empty password is accepted. Either would produce a device whose
-firmware anyone on the local network could replace — and this device is a
-microphone. API encryption does **not** protect the OTA endpoint.
+firmware anyone on the local network could replace. API encryption does
+**not** protect the OTA endpoint.
 
 Pivot therefore fails the **compile** rather than shipping an unprotected
 device. Building without a password stops with:
