@@ -9,7 +9,9 @@ Pivot firmware runs on your local network via the ESPHome API. It does not intro
 Both the API connection and OTA updates are authenticated:
 
 - **API:** encrypted with a unique per-device `api_encryption_key`.
-- **OTA:** protected by a unique per-device `ota_password`.
+- **OTA:** protected by an `ota_password`. One password can be shared by all
+  your Pivot devices; the trade-off is that anyone who learns it can update
+  every one of them.
 
 Both are **required**. There is no usable default for either.
 
@@ -30,8 +32,8 @@ error: static assertion failed: Set a unique ota_password in your device YAML - 
 
 ### Setting it
 
-Generate a unique value per device and store it in your ESPHome
-`secrets.yaml` (never commit that file):
+Generate a value and store it in your ESPHome `secrets.yaml` (never commit
+that file). One value can be reused across all your Pivot devices:
 
 ```bash
 openssl rand -hex 16
@@ -44,11 +46,11 @@ hex and there is nothing to think about.
 
 ```yaml
 # secrets.yaml
-pivot_ota_lounge: "a1b2c3d4e5f6..."
+pivot_ota_password: "a1b2c3d4e5f6..."
 
 # devices/<your-device>.yaml
 substitutions:
-  ota_password: !secret pivot_ota_lounge
+  ota_password: !secret pivot_ota_password
 ```
 
 ### Upgrading an existing device
@@ -72,7 +74,7 @@ new firmware set the new one at boot:
 
 ```yaml
 substitutions:
-  ota_password: !secret pivot_ota_lounge      # still the OLD value
+  ota_password: !secret pivot_ota_password      # still the OLD value
 
 esphome:
   on_boot:
