@@ -1073,7 +1073,7 @@ binary_sensor:
       - lambda: id(jack_unplugged_recently) = false;
       - script.execute: control_leds
 
-  # Sync passive flags from HA template binary sensors (on = scene/script bank, knob disabled)
+  # Sync passive flags from HA binary sensors (on = scene/script/switch/garage door bank, knob disabled)
   - platform: homeassistant
     id: ha_bank_passive_0
     entity_id: binary_sensor.${device_suffix}_bank_1_passive
@@ -2539,7 +2539,7 @@ script:
                      (id(active_bank) == 1) ? id(bank_passive_1) :
                      (id(active_bank) == 2) ? id(bank_passive_2) : id(bank_passive_3);
           then:
-            - logger.log: "Bank is passive (scene/script) — ignoring knob"
+            - logger.log: "Bank is passive (scene/script/switch/garage door) — ignoring knob"
           else:
             - lambda: |
                 id(bank_updating) = true;
@@ -2676,10 +2676,17 @@ script:
                 bool passive = (id(active_bank) == 0) ? id(bank_passive_0) :
                                (id(active_bank) == 1) ? id(bank_passive_1) :
                                (id(active_bank) == 2) ? id(bank_passive_2) : id(bank_passive_3);
-                // Passive banks (scene/script/switch/input_boolean) have no value —
-                // show nothing. Bank Indicator still shows during bank switching above.
+                float value = (id(active_bank) == 0) ? id(bank_value_0) :
+                              (id(active_bank) == 1) ? id(bank_value_1) :
+                              (id(active_bank) == 2) ? id(bank_value_2) : id(bank_value_3);
+                // Passive banks have no value to control. Stateful ones
+                // (switch, input_boolean, open/close-only cover) carry their
+                // state as 100/0, shown as a full ring when on and nothing when
+                // off. Stateless ones (scene/script) are held at 0 by the
+                // integration, so they show nothing, as before. Bank Indicator
+                // still shows during bank switching above.
                 bool show = id(show_control_value) || id(dial_touched);
-                if (show && !passive) {
+                if (show && (!passive || value > 0.0f)) {
                   // Dim to 40% when idle, full 80% when active.
                   // Fade to dim over 1.5s; snap back instantly on interaction.
                   bool idle = id(dim_when_idle) && id(led_is_idle) && id(show_control_value);
