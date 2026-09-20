@@ -15,13 +15,19 @@ Both the API connection and OTA updates are authenticated:
 
 Both are **required**. There is no usable default for either.
 
+**The API key authenticates OTA uploads too.** On current ESPHome, a device
+built with an `api_encryption_key` also accepts *encrypted* OTA uploads
+authenticated by that key, and those uploads skip the password check
+entirely. So the key deserves the same care as the password: anyone holding
+it can replace the firmware whether or not they know the password.
+
 ### Why this is enforced at build time
 
 ESPHome does not validate the OTA password, so a missing one fails quietly:
 an unset substitution passes through as the literal string `${ota_password}`,
-and an empty password is accepted. Either would produce a device whose
-firmware anyone on the local network could replace. API encryption does
-**not** protect the OTA endpoint.
+and an empty password is accepted. Either would leave the device accepting
+*plaintext* OTA uploads from anyone who can reach it on the network — the
+path used by tools that do not support OTA encryption.
 
 Pivot therefore fails the **compile** rather than shipping an unprotected
 device. Building without a password stops with:
@@ -29,6 +35,13 @@ device. Building without a password stops with:
 ```
 error: static assertion failed: Set a unique ota_password in your device YAML - see SECURITY.md
 ```
+
+### Planned change
+
+ESPHome removes the plaintext OTA path in 2027.3.0. Before then Pivot will
+replace `password:` with `encryption:` under `ota:`, which requires every
+upload to be authenticated with the device's API key and removes the
+separate OTA password altogether.
 
 ### Setting it
 
@@ -104,8 +117,10 @@ alternative — it is the same amount of physical work and has fewer steps.
 
 ### If you lose the password
 
-There is **no network recovery path**. The device must be re-flashed over USB.
-Keep these values somewhere that survives a machine rebuild.
+You can still update the device over the air if you have its
+`api_encryption_key`, because an encrypted upload does not check the
+password. Without either value, the device must be re-flashed over USB.
+Keep both somewhere that survives a machine rebuild.
 
 See [ESPHome's Security Best Practices](https://esphome.io/guides/security_best_practices/),
 which recommends unique API keys and OTA passwords per device.
