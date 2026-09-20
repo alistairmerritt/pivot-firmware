@@ -1361,7 +1361,17 @@ light:
   - platform: esp32_rmt_led_strip
     id: leds_internal
     pin: GPIO21
-    chipset: WS2812
+    # Explicit timings rather than the WS2812 chipset preset: the ring is
+    # WS2812B-2020, which needs a latch gap of ~280us between frames. The
+    # preset sets none, which can leave the next frame misread as a
+    # continuation of the last — flicker, or briefly wrong colours. Matches
+    # upstream home-assistant-voice-pe (#640).
+    bit0_high: 300ns
+    bit0_low: 975ns
+    bit1_high: 650ns
+    bit1_low: 650ns
+    reset_low: 300us
+    reset_high: 0us
     max_refresh_rate: 15ms
     num_leds: 12
     rgb_order: GRB
