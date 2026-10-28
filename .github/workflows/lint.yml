@@ -21,3 +21,54 @@ jobs:
           yamllint -d '{extends: relaxed, rules: {line-length: {max: 200}}}' \
             home-assistant-voice.yaml \
             devices/
+
+  config:
+    # The oldest ESPHome the firmware supports (esphome: min_version) and the
+    # newest, which is what Device Builder installs. Latest is unpinned on
+    # purpose: a new ESPHome release that breaks the config breaks every
+    # Install, and this is how to hear about it first.
+    name: ESPHome config (${{ matrix.esphome }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        esphome: ["2026.10.0", "latest"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ESPHome
+        run: |
+          if [ "${{ matrix.esphome }}" = latest ]; then
+            pip install esphome
+          else
+            pip install "esphome==${{ matrix.esphome }}"
+          fi
+
+      # devices/example.yaml with test values, building the package from this
+      # checkout instead of the stable branch. The upright LED offset is the
+      # one that is not the default.
+      - name: Make a device config from the example
+        run: |
+          python - <<'EOF'
+          import os, re
+          t = open("devices/example.yaml").read()
+          t, n = re.subn(r"packages:\n  pivot:\n(    .*\n)+",
+                         "packages:\n  pivot: !include ../home-assistant-voice.yaml\n", t)
+          assert n == 1, "packages block not found in devices/example.yaml"
+          for old, new in {
+              "!secret wifi_ssid": '"ci"',
+              "!secret wifi_password": '"ci-password"',
+              '"generate-a-unique-key-here"': '"aGVsbG9oZWxsb2hlbGxvaGVsbG9oZWxsb2hlbGxvMTI="',
+              "led_offset: '6'": "led_offset: '0'",
+          }.items():
+              assert old in t, f"{old} not found in devices/example.yaml"
+              t = t.replace(old, new)
+          os.makedirs("ci", exist_ok=True)
+          open("ci/device.yaml", "w").write(t)
+          EOF
+
+      - name: Validate
+        run: esphome config ci/device.yaml

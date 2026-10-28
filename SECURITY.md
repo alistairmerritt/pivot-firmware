@@ -6,124 +6,52 @@ Pivot firmware runs on your local network via the ESPHome API. It does not intro
 
 ## Over-the-air (OTA) updates
 
-Both the API connection and OTA updates are authenticated:
+Both the API connection and OTA updates are authenticated with the device's
+`api_encryption_key`:
 
-- **API:** encrypted with a unique per-device `api_encryption_key`.
-- **OTA:** protected by an `ota_password`. One password can be shared by all
-  your Pivot devices; the trade-off is that anyone who learns it can update
-  every one of them.
+- **API:** encrypted with the key.
+- **OTA:** every upload must be encrypted with the same key. The device
+  refuses unencrypted uploads, so there is no separate password to set, guess
+  or leak.
 
-Both are **required**. There is no usable default for either.
+The key is **required**. ESPHome refuses to build without a valid one, so
+there is no usable default. Use a unique key for each device and keep it
+secret: anyone holding it can control the device and replace its firmware.
 
-**The API key authenticates OTA uploads too.** On current ESPHome, a device
-built with an `api_encryption_key` also accepts *encrypted* OTA uploads
-authenticated by that key, and those uploads skip the password check
-entirely. So the key deserves the same care as the password: anyone holding
-it can replace the firmware whether or not they know the password.
+### Moving from the OTA password
 
-### Why this is enforced at build time
+Pivot firmware v0.0.29 and earlier used an `ota_password`. From v0.0.30 it uses
+OTA encryption instead, which ESPHome requires from 2027.3.0. To update a
+device that has a password:
 
-ESPHome does not validate the OTA password, so a missing one fails quietly:
-an unset substitution passes through as the literal string `${ota_password}`,
-and an empty password is accepted. Either would leave the device accepting
-*plaintext* OTA uploads from anyone who can reach it on the network — the
-path used by tools that do not support OTA encryption.
+1. Update ESPHome Device Builder to 2026.10.0 or later.
+2. Click **Install**. If the device's current firmware was built with ESPHome
+   2026.9.0 or later, it already accepts encrypted uploads and this is all
+   you need.
+3. If ESPHome stops with *"the device did not offer encryption; refusing to
+   send the image in plaintext"*, the current firmware is older than that.
+   Change `ref: stable` to `ref: v0.0.29` in the device YAML and install, which
+   gives the device firmware that accepts encrypted uploads. Then change it
+   back to `ref: stable` and install again.
+4. Once the device is on v0.0.30, delete the `ota_password` line from its
+   substitutions, and `pivot_ota_password` from `secrets.yaml` when no device
+   uses it.
 
-Pivot therefore fails the **compile** rather than shipping an unprotected
-device. Building without a password stops with:
+Keep `ota_password` until step 4: v0.0.29 still needs it to build.
 
-```
-error: static assertion failed: Set a unique ota_password in your device YAML - see SECURITY.md
-```
+### Changing the key
 
-### Planned change
+A device only accepts an update encrypted with the key it already has, so
+installing with a new key is refused. Changing a device's key means flashing
+it over USB. Home Assistant then asks for the new key.
 
-ESPHome removes the plaintext OTA path in 2027.3.0. Before then Pivot will
-replace `password:` with `encryption:` under `ota:`, which requires every
-upload to be authenticated with the device's API key and removes the
-separate OTA password altogether.
+### If you lose the key
 
-### Setting it
-
-Generate a value and store it in your ESPHome `secrets.yaml` (never commit
-that file). One value can be reused across all your Pivot devices:
-
-```bash
-openssl rand -hex 16
-```
-
-**Requirements:** at least 12 characters. Use the hexadecimal output above.
-The build-time guard embeds the password in a C++ string literal, so quotes,
-backslashes and other escape characters are not safely supported — stick to
-hex and there is nothing to think about.
-
-```yaml
-# secrets.yaml
-pivot_ota_password: "a1b2c3d4e5f6..."
-
-# devices/<your-device>.yaml
-substitutions:
-  ota_password: !secret pivot_ota_password
-```
-
-### Upgrading an existing device
-
-Adding a password is **not** a bricking risk. The first upload still succeeds
-unauthenticated, because the firmware currently running on the device has no
-password set. Enforcement begins with the update after that.
-
-### Rotating the password
-
-Changing the password is **not** a one-step edit. ESPHome uses the configured
-password for two different things at once: authenticating the upload, *and*
-setting the password baked into the firmware being uploaded. So if you simply
-swap in a new value and install, the upload authenticates with the **new**
-password against firmware that still expects the **old** one, and fails.
-
-ESPHome's documented workaround is a two-stage transition.
-
-**Stage 1** — keep the OLD password so the upload can authenticate, and have the
-new firmware set the new one at boot:
-
-```yaml
-substitutions:
-  ota_password: !secret pivot_ota_password      # still the OLD value
-
-esphome:
-  on_boot:
-    # List form, and a priority ABOVE Pivot's own 375 automation. Both matter:
-    # ESPHome concatenates lists when merging packages, so a mapping-form
-    # on_boot here would be appended to the end of Pivot's automation — after
-    # its ten-minute delay — and the new password would not be set for ten
-    # minutes.
-    - priority: 800
-      then:
-        - lambda: |-
-            id(ota_esphome).set_auth_password("THE-NEW-PASSWORD");
-```
-
-Install. The device authenticates with the old password and reboots using the
-new one. This runs as its own automation, so Pivot's boot behaviour is
-unaffected and there is no delay to wait out.
-
-**Stage 2** — remove that `on_boot` block, put the new value in `secrets.yaml`,
-and install again to confirm the new password authenticates.
-
-See [Changing the OTA password](https://esphome.io/components/ota/esphome/) for
-the upstream description.
-
-If that feels fiddly, re-flashing over USB is a perfectly reasonable
-alternative — it is the same amount of physical work and has fewer steps.
-
-### If you lose the password
-
-You can still update the device over the air if you have its
-`api_encryption_key`, because an encrypted upload does not check the
-password. Without either value, the device must be re-flashed over USB.
-Keep both somewhere that survives a machine rebuild.
+Without the `api_encryption_key`, the device must be re-flashed over USB.
+Keep the key somewhere that survives a machine rebuild.
 
 See [ESPHome's Security Best Practices](https://esphome.io/guides/security_best_practices/),
-which recommends unique API keys and OTA passwords per device.
+which recommends a unique API key per device.
 
 ## Reporting a vulnerability
 

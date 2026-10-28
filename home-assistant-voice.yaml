@@ -31,11 +31,6 @@ substitutions:
   # https://esphome.io/components/api.html#configuration-variables
   api_encryption_key: "your_generated_key_here"
 
-  # OTA update password — MUST be overridden per device. This sentinel default
-  # exists only so a missing value is caught: the build-time guard in on_boot
-  # below fails the compile if it survives. See SECURITY.md.
-  ota_password: "PIVOT_UNSET_OTA_PASSWORD"
-
   # LED orientation — set based on how your device is mounted:
   #   flat:    cable faces away, device is flat on a surface (LEDs start at bottom)
   #   upright: cable faces down, device is on a stand (LEDs start at top)
@@ -86,31 +81,24 @@ esphome:
   name: ${device_name}
   friendly_name: ${device_friendly_name}
   name_add_mac_suffix: false
-  min_version: 2026.5.0
+  # 2026.10.0: OTA encryption (2026.9.0), `channel_colors` on the LED strip
+  # (2026.8.0), and the one-install migration from an OTA password.
+  min_version: 2026.10.0
+  # Shown in Home Assistant as the device's manufacturer, model and firmware
+  # version. Bump `version` with every firmware tag: the Move stable workflow
+  # refuses a tag that does not match it.
+  project:
+    name: "Made with Merritt.Pivot"
+    version: "0.0.30"
   on_boot:
     # LIST form (a list of automations), not a single mapping. ESPHome merges
     # packages by recursively merging mappings and CONCATENATING lists. In
     # mapping form, a user's own on_boot actions were appended to the end of
     # THIS automation's `then:` — i.e. after the 10-minute delay below, which
-    # silently broke the documented OTA password rotation. List form keeps a
-    # user's automation separate, with its own priority.
+    # once silently broke the documented OTA password rotation. List form keeps
+    # a user's automation separate, with its own priority.
     - priority: 375
       then:
-        # Build-time guard, not a runtime check: this fails the COMPILE if
-        # ota_password was never set for this device. ESPHome does not validate
-        # the OTA password (an unset substitution passes through as a literal,
-        # and an empty string is accepted), so without this a device could ship
-        # with firmware anyone on the LAN can replace. See SECURITY.md.
-        - lambda: |-
-            static_assert(
-              __builtin_strcmp("${ota_password}", "PIVOT_UNSET_OTA_PASSWORD") != 0,
-              "Set a unique ota_password in your device YAML - see SECURITY.md");
-            // sizeof a string literal is length + 1, so >= 13 means >= 12 chars.
-            // This also catches ota_password: "" — ESPHome accepts an empty
-            // password and then serves OTA with no authentication at all.
-            static_assert(
-              sizeof("${ota_password}") >= 13,
-              "ota_password must be at least 12 characters - see SECURITY.md");
         # Run the script to refresh the LED status
         - script.execute: control_leds
         - delay: 1s
@@ -361,11 +349,11 @@ api:
 ota:
   - platform: esphome
     id: ota_esphome
-    # The substitution above defaults to a sentinel, not to a usable password:
-    # there is deliberately no working default. The on_boot guard rejects that
-    # sentinel, an empty value, and anything under 12 characters, so a device
-    # cannot ship with firmware anyone on the LAN can replace. See SECURITY.md.
-    password: ${ota_password}
+    # Every upload must be encrypted with this device's api_encryption_key;
+    # unencrypted uploads are refused. ESPHome checks the key is set and valid
+    # at compile time, so there is no usable default. Replaces the OTA
+    # password, which ESPHome stops supporting in 2027.3.0. See SECURITY.md.
+    encryption:
 
 i2c:
   - id: internal_i2c
@@ -739,10 +727,31 @@ switch:
                 data:
                   entity_id: select.${device_suffix}_timer_state
                   option: idle
-            - homeassistant.action:
-                action: switch.turn_on
-                data:
-                  entity_id: switch.${device_suffix}_dim_when_idle
+            # Put Dim LEDs When Idle back as it was before the timer started:
+            # the timer turns it off while running. On when there is no saved
+            # value, which is how an older Timer Control blueprint expects it.
+            - if:
+                condition:
+                  lambda: 'return id(ha_timer_restore_dim).has_state() && id(ha_timer_restore_dim).state == "off";'
+                then:
+                  - homeassistant.action:
+                      action: switch.turn_off
+                      data:
+                        entity_id: switch.${device_suffix}_dim_when_idle
+                else:
+                  - homeassistant.action:
+                      action: switch.turn_on
+                      data:
+                        entity_id: switch.${device_suffix}_dim_when_idle
+            - if:
+                condition:
+                  lambda: 'return id(ha_timer_restore_dim).has_state();'
+                then:
+                  - homeassistant.action:
+                      action: text.set_value
+                      data:
+                        entity_id: text.${device_suffix}_timer_restore_dim
+                        value: ""
     on_turn_on:
       # Duck audio
       - mixer_speaker.apply_ducking:
@@ -1345,6 +1354,11 @@ text_sensor:
   # Pivot timer state — when set to 'alerting' by the integration, trigger the
   # native timer alarm (sound + LED ring + button dismiss) exactly as the stock
   # voice-assistant timer does.  No HA automation or media_player call needed.
+  # Dim LEDs When Idle as it was before the timer started, saved by the timer
+  # blueprints. Read when an alarm is dismissed.
+  - platform: homeassistant
+    id: ha_timer_restore_dim
+    entity_id: text.${device_suffix}_timer_restore_dim
   - platform: homeassistant
     id: ha_timer_state
     entity_id: select.${device_suffix}_timer_state
@@ -1374,7 +1388,7 @@ light:
     reset_high: 0us
     max_refresh_rate: 15ms
     num_leds: 12
-    rgb_order: GRB
+    channel_colors: GRB
     rmt_symbols: 192
     default_transition_length: 0ms
     power_supply: led_power
@@ -1559,7 +1573,7 @@ light:
               }
             }
             if (id(external_media_player).volume == 0.0f) {
-              it[6] = silenced_color;
+              it[${led_offset}] = silenced_color;
             }
       - addressable_lambda:
           name: "Control Mode Gauge"
@@ -1600,7 +1614,7 @@ light:
               }
             }
             if (val == 0.0f) {
-              it[6] = bank_color * (uint8_t)30;
+              it[${led_offset}] = bank_color * (uint8_t)30;
             }
       - addressable_lambda:
           name: "Bank Solid Color"

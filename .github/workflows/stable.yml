@@ -22,6 +22,18 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      # The version Home Assistant shows for the device comes from
+      # `esphome: project: version`, so a tag that does not match it would
+      # ship firmware reporting the wrong version.
+      - name: Check the tag matches the firmware version
+        run: |
+          version=$(awk '/^  project:/ {p = 1; next}
+                         p && /^    version:/ {gsub(/"/, "", $2); print $2; exit}
+                         p && /^  [^ ]/ {exit}' home-assistant-voice.yaml)
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match esphome: project: version \"$version\" in home-assistant-voice.yaml"
+            exit 1
+          fi
       # A plain push, not a force push: git refuses one that would move
       # `stable` backwards or onto another line of history, and the failed
       # run says so.
