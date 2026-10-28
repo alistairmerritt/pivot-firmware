@@ -54,6 +54,11 @@ substitutions:
 packages:
   pivot:
     url: https://github.com/alistairmerritt/pivot-firmware
-    ref: main
+    # `stable` is the latest release. It only moves when a new version is
+    # published, so Install never builds unreleased work. To stay on one
+    # version, use its tag instead, e.g. `ref: v0.0.28`.
+    ref: stable
     file: home-assistant-voice.yaml
+    # Check for a new release on every Install. This never flashes anything
+    # by itself.
     refresh: 0s
