@@ -693,6 +693,18 @@ switch:
     entity_category: config
     optimistic: true
     restore_mode: RESTORE_DEFAULT_ON
+  # Disable physical controls (a child lock). Same id and name as upstream
+  # (#428), but visible by default: a locked dial that nobody can find the
+  # switch for just looks broken. While on, the button and knob do nothing,
+  # except that a press still stops a ringing alarm. The factory reset hold,
+  # the hardware mute switch, voice and Home Assistant are unaffected.
+  - platform: template
+    id: disable_buttons
+    name: Disable physical controls
+    icon: "mdi:button-pointer"
+    entity_category: config
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
   # Switch to track when a timer is ringing on the device.
   # Exposed to HA so a dashboard button can dismiss the alarm via switch.turn_off.
   - platform: template
@@ -822,13 +834,14 @@ binary_sensor:
       #     - Voice Assistant Pipeline run
       #     - Music
       #   - Starts the voice assistant if it is not yet running and if the device is not muted.
+      #   - With physical controls disabled, only stops a ringing alarm.
       - timing:
           - ON for at most 1s
           - OFF for at least 0.25s
         then:
           - if:
               condition:
-                lambda: return !id(init_in_progress) && !id(color_changed) && !id(group_volume_changed) && !id(dial_touched);
+                lambda: return !id(init_in_progress) && !id(color_changed) && !id(group_volume_changed) && !id(dial_touched) && (!id(disable_buttons).state || id(timer_ringing).state);
               then:
                 - if:
                     condition:
@@ -883,7 +896,7 @@ binary_sensor:
         then:
           - if:
               condition:
-                lambda: return !id(init_in_progress) && !id(color_changed) && !id(group_volume_changed);
+                lambda: return !id(init_in_progress) && !id(color_changed) && !id(group_volume_changed) && !id(disable_buttons).state;
               then:
                 - lambda: id(control_mode) = !id(control_mode);
                 - script.execute: set_mode_led_color
@@ -922,7 +935,7 @@ binary_sensor:
         then:
           - if:
               condition:
-                lambda: return !id(init_in_progress) && !id(color_changed) && !id(group_volume_changed);
+                lambda: return !id(init_in_progress) && !id(color_changed) && !id(group_volume_changed) && !id(disable_buttons).state;
               then:
                 - lambda: id(button_press_event).trigger("triple_press");
       # Long Press (1s+)
@@ -933,7 +946,7 @@ binary_sensor:
         then:
           - if:
               condition:
-                lambda: return !id(init_in_progress) && !id(color_changed) && !id(group_volume_changed) && !id(dial_touched);
+                lambda: return !id(init_in_progress) && !id(color_changed) && !id(group_volume_changed) && !id(dial_touched) && !id(disable_buttons).state;
               then:
                 - script.execute:
                     id: play_sound
@@ -1895,85 +1908,95 @@ sensor:
     pin_b: GPIO18
     resolution: 2
     on_clockwise:
-      - lambda: id(dial_touched) = true; id(last_interaction_ms) = millis(); id(led_is_idle) = false;
+      # Physical controls disabled: ignore the turn entirely. dial_touched is
+      # only cleared by the scripts below, so it must not be set either.
       - if:
           condition:
-            lambda: return id(control_mode);
+            switch.is_off: disable_buttons
           then:
+            - lambda: id(dial_touched) = true; id(last_interaction_ms) = millis(); id(led_is_idle) = false;
             - if:
-                # VA is speaking — treat knob as volume, not bank control
                 condition:
-                  lambda: return id(voice_assistant_phase) == ${voice_assist_replying_phase_id};
+                  lambda: return id(control_mode);
                 then:
-                  - script.execute:
-                      id: control_volume
-                      increase_volume: true
+                  - if:
+                      # VA is speaking — treat knob as volume, not bank control
+                      condition:
+                        lambda: return id(voice_assistant_phase) == ${voice_assist_replying_phase_id};
+                      then:
+                        - script.execute:
+                            id: control_volume
+                            increase_volume: true
+                      else:
+                        - if:
+                            condition:
+                              binary_sensor.is_on: center_button
+                            then:
+                              # Hold + turn in Control Mode: switch bank
+                              - script.execute:
+                                  id: bank_switch
+                                  increase: true
+                            else:
+                              - script.execute:
+                                  id: bank_value_change
+                                  increase: true
                 else:
                   - if:
                       condition:
-                        binary_sensor.is_on: center_button
+                        binary_sensor.is_off: center_button
                       then:
-                        # Hold + turn in Control Mode: switch bank
                         - script.execute:
-                            id: bank_switch
-                            increase: true
+                            id: control_volume
+                            increase_volume: true
                       else:
+                        # Hold + turn in Normal Mode: change LED ring colour (stock behaviour)
                         - script.execute:
-                            id: bank_value_change
-                            increase: true
-          else:
-            - if:
-                condition:
-                  binary_sensor.is_off: center_button
-                then:
-                  - script.execute:
-                      id: control_volume
-                      increase_volume: true
-                else:
-                  # Hold + turn in Normal Mode: change LED ring colour (stock behaviour)
-                  - script.execute:
-                      id: control_hue
-                      increase_hue: true
+                            id: control_hue
+                            increase_hue: true
     on_anticlockwise:
-      - lambda: id(dial_touched) = true; id(last_interaction_ms) = millis(); id(led_is_idle) = false;
       - if:
           condition:
-            lambda: return id(control_mode);
+            switch.is_off: disable_buttons
           then:
+            - lambda: id(dial_touched) = true; id(last_interaction_ms) = millis(); id(led_is_idle) = false;
             - if:
-                # VA is speaking — treat knob as volume, not bank control
                 condition:
-                  lambda: return id(voice_assistant_phase) == ${voice_assist_replying_phase_id};
+                  lambda: return id(control_mode);
                 then:
-                  - script.execute:
-                      id: control_volume
-                      increase_volume: false
+                  - if:
+                      # VA is speaking — treat knob as volume, not bank control
+                      condition:
+                        lambda: return id(voice_assistant_phase) == ${voice_assist_replying_phase_id};
+                      then:
+                        - script.execute:
+                            id: control_volume
+                            increase_volume: false
+                      else:
+                        - if:
+                            condition:
+                              binary_sensor.is_on: center_button
+                            then:
+                              # Hold + turn in Control Mode: switch bank
+                              - script.execute:
+                                  id: bank_switch
+                                  increase: false
+                            else:
+                              - script.execute:
+                                  id: bank_value_change
+                                  increase: false
                 else:
                   - if:
                       condition:
-                        binary_sensor.is_on: center_button
+                        binary_sensor.is_off: center_button
                       then:
-                        # Hold + turn in Control Mode: switch bank
                         - script.execute:
-                            id: bank_switch
-                            increase: false
+                            id: control_volume
+                            increase_volume: false
                       else:
+                        # Hold + turn in Normal Mode: change LED ring colour (stock behaviour)
                         - script.execute:
-                            id: bank_value_change
-                            increase: false
-          else:
-            - if:
-                condition:
-                  binary_sensor.is_off: center_button
-                then:
-                  - script.execute:
-                      id: control_volume
-                      increase_volume: false
-                else:
-                  # Hold + turn in Normal Mode: change LED ring colour (stock behaviour)
-                  - script.execute:
-                      id: control_hue
-                      increase_hue: false
+                            id: control_hue
+                            increase_hue: false
 
   # Sync per-bank values from Home Assistant
   - platform: homeassistant
@@ -2808,7 +2831,10 @@ speaker:
 
 sendspin:
   id: sendspin_hub
-  task_stack_in_psram: false
+  # Upstream moved this to internal RAM in #562 without saying why. Pivot runs
+  # more than stock on the same internal RAM and has used PSRAM here without
+  # trouble since March, so it stays until it can be measured on a device.
+  task_stack_in_psram: true
 
 audio_file:
   - id: center_button_press_sound
@@ -2924,8 +2950,9 @@ voice_kit:
 # deliberately when adopting upstream changes.
 # db8fe1f = dev @ 2026-09-17 ("Set a preference order for Sendspin codecs", #642),
 # the latest upstream firmware change. This file has every upstream config
-# change up to it except #428's "Disable physical controls" switch, which
-# Pivot's own button and dial handling would need designing for.
+# change up to it, with two differences: #428's "Disable physical controls"
+# is built into Pivot's own button and dial handling (see `disable_buttons`),
+# and #562's Sendspin `task_stack_in_psram: false` is not taken (see `sendspin`).
 external_components:
   - source:
       type: git
