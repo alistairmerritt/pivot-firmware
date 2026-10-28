@@ -89,7 +89,7 @@ esphome:
   # refuses a tag that does not match it.
   project:
     name: "Made with Merritt.Pivot"
-    version: "0.0.31"
+    version: "0.0.32"
   on_boot:
     # LIST form (a list of automations), not a single mapping. ESPHome merges
     # packages by recursively merging mappings and CONCATENATING lists. In
@@ -2831,10 +2831,7 @@ speaker:
 
 sendspin:
   id: sendspin_hub
-  # Upstream moved this to internal RAM in #562 without saying why. Pivot runs
-  # more than stock on the same internal RAM and has used PSRAM here without
-  # trouble since March, so it stays until it can be measured on a device.
-  task_stack_in_psram: true
+  task_stack_in_psram: false
 
 audio_file:
   - id: center_button_press_sound
@@ -2950,9 +2947,8 @@ voice_kit:
 # deliberately when adopting upstream changes.
 # db8fe1f = dev @ 2026-09-17 ("Set a preference order for Sendspin codecs", #642),
 # the latest upstream firmware change. This file has every upstream config
-# change up to it, with two differences: #428's "Disable physical controls"
-# is built into Pivot's own button and dial handling (see `disable_buttons`),
-# and #562's Sendspin `task_stack_in_psram: false` is not taken (see `sendspin`).
+# change up to it. #428's "Disable physical controls" is built into Pivot's
+# own button and dial handling instead of copied (see `disable_buttons`).
 external_components:
   - source:
       type: git
