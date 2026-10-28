@@ -60,22 +60,22 @@ substitutions:
   # Upstream sound assets, pinned to the same commit as the voice_kit
   # external component below. `dev` is a moving branch: builds from it
   # were not reproducible.
-  jack_connected_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/jack_connected.flac
-  jack_disconnected_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/jack_disconnected.flac
-  mute_switch_on_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/mute_switch_on.flac
-  mute_switch_off_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/mute_switch_off.flac
-  timer_finished_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/timer_finished.flac
-  wake_word_triggered_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/wake_word_triggered.flac
-  center_button_press_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/center_button_press.flac
-  center_button_double_press_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/center_button_double_press.flac
-  center_button_triple_press_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/center_button_triple_press.flac
-  center_button_long_press_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/center_button_long_press.flac
-  factory_reset_initiated_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/factory_reset_initiated.mp3
-  factory_reset_cancelled_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/factory_reset_cancelled.mp3
-  factory_reset_confirmed_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/factory_reset_confirmed.mp3
-  easter_egg_tick_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/easter_egg_tick.mp3
-  easter_egg_tada_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/easter_egg_tada.mp3
-  error_cloud_expired_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/0579e7b9d8504264719c593474c85447253c9dc1/sounds/error_cloud_expired.mp3
+  jack_connected_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/db8fe1f4c4d22c308430bae556fb5253df958464/sounds/jack_connected.flac
+  jack_disconnected_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/db8fe1f4c4d22c308430bae556fb5253df958464/sounds/jack_disconnected.flac
+  mute_switch_on_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/db8fe1f4c4d22c308430bae556fb5253df958464/sounds/mute_switch_on.flac
+  mute_switch_off_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/db8fe1f4c4d22c308430bae556fb5253df958464/sounds/mute_switch_off.flac
+  timer_finished_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/db8fe1f4c4d22c308430bae556fb5253df958464/sounds/timer_finished.flac
+  wake_word_triggered_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/db8fe1f4c4d22c308430bae556fb5253df958464/sounds/wake_word_triggered.flac
+  center_button_press_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/db8fe1f4c4d22c308430bae556fb5253df958464/sounds/center_button_press.flac
+  center_button_double_press_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/db8fe1f4c4d22c308430bae556fb5253df958464/sounds/center_button_double_press.flac
+  center_button_triple_press_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/db8fe1f4c4d22c308430bae556fb5253df958464/sounds/center_button_triple_press.flac
+  center_button_long_press_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/db8fe1f4c4d22c308430bae556fb5253df958464/sounds/center_button_long_press.flac
+  factory_reset_initiated_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/db8fe1f4c4d22c308430bae556fb5253df958464/sounds/factory_reset_initiated.mp3
+  factory_reset_cancelled_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/db8fe1f4c4d22c308430bae556fb5253df958464/sounds/factory_reset_cancelled.mp3
+  factory_reset_confirmed_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/db8fe1f4c4d22c308430bae556fb5253df958464/sounds/factory_reset_confirmed.mp3
+  easter_egg_tick_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/db8fe1f4c4d22c308430bae556fb5253df958464/sounds/easter_egg_tick.mp3
+  easter_egg_tada_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/db8fe1f4c4d22c308430bae556fb5253df958464/sounds/easter_egg_tada.mp3
+  error_cloud_expired_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/db8fe1f4c4d22c308430bae556fb5253df958464/sounds/error_cloud_expired.mp3
 
 esphome:
   name: ${device_name}
@@ -89,7 +89,7 @@ esphome:
   # refuses a tag that does not match it.
   project:
     name: "Made with Merritt.Pivot"
-    version: "0.0.30"
+    version: "0.0.31"
   on_boot:
     # LIST form (a list of automations), not a single mapping. ESPHome merges
     # packages by recursively merging mappings and CONCATENATING lists. In
@@ -145,6 +145,14 @@ wifi:
   on_connect:
     - lambda: id(improv_ble_in_progress) = false;
     - script.execute: control_leds
+    # Enable/disable Sendspin static adjustment delay if the jack is plugged in or not
+    - if:
+        condition:
+          - binary_sensor.is_on: jack_plugged
+        then:
+          - sendspin.media_source.enable_static_delay_adjustment:
+        else:
+          - sendspin.media_source.disable_static_delay_adjustment:
   on_disconnect:
     - script.execute: control_leds
 
@@ -1055,9 +1063,11 @@ binary_sensor:
       number: GPIO17
     # When the jack is plugged in:
     #  - LED animation
+    #  - Enable Sendspin static delay adjustment to apply the persisted delay when using the external audio output
     #  - Sound played
     on_press:
       - lambda: id(jack_plugged_recently) = true;
+      - sendspin.media_source.enable_static_delay_adjustment:
       - script.execute: control_leds
       - delay: 200ms
       - script.execute:
@@ -1069,10 +1079,12 @@ binary_sensor:
       - script.execute: control_leds
     # When the jack is unplugged:
     #  - LED animation
+    #  - Disable Sendspin static delay adjustment when using the internal speaker
     #  - Sound played
     on_release:
       - lambda: id(jack_unplugged_recently) = true;
       - script.execute: control_leds
+      - sendspin.media_source.disable_static_delay_adjustment:
       - delay: 200ms
       - script.execute:
           id: play_sound
@@ -2456,12 +2468,14 @@ script:
   # Script executed when the timer is ringing, to repeat the timer finished sound.
   - id: enable_repeat_one
     then:
+      # Turn on the repeat mode and pause for 500 ms between playlist items/repeats
       - media_player.repeat_one:
           id: external_media_player
           announcement: true
-      # Turn on the repeat mode and pause for 500 ms between playlist items/repeats
-      - lambda: |-
-            id(external_media_player)->set_playlist_delay_ms(1, 500);
+      - speaker_source.set_playlist_delay:
+          id: external_media_player
+          pipeline: announcement
+          delay: 500ms
 
   # Script execute when the timer is done ringing, to disable repeat mode.
   - id: disable_repeat
@@ -2470,8 +2484,10 @@ script:
       - media_player.repeat_off:
           id: external_media_player
           announcement: true
-      - lambda: |-
-            id(external_media_player)->set_playlist_delay_ms(1, 0);
+      - speaker_source.set_playlist_delay:
+          id: external_media_player
+          pipeline: announcement
+          delay: 0ms
 
   # Script executed when we want to play sounds on the device.
   - id: play_sound
@@ -2792,7 +2808,7 @@ speaker:
 
 sendspin:
   id: sendspin_hub
-  task_stack_in_psram: true
+  task_stack_in_psram: false
 
 audio_file:
   - id: center_button_press_sound
@@ -2839,6 +2855,7 @@ media_source:
     buffer_size: 500000
   - platform: sendspin
     id: sendspin_media_source
+    codecs: [FLAC, PCM]  # Prefer FLAC for Sendspin
     fixed_delay: 480 microseconds  # The AIC3204 DAC used, as configured, on the VPE delays audio by 480 microseconds
 
 media_player:
@@ -2905,12 +2922,15 @@ voice_kit:
 # branch, so voice_kit could change between builds with no version change here —
 # which is how an upstream regression can arrive unannounced. Bump this SHA
 # deliberately when adopting upstream changes.
-# 0579e7b = dev @ 2026-07-07 ("Switch to lock buttons", #428)
+# db8fe1f = dev @ 2026-09-17 ("Set a preference order for Sendspin codecs", #642),
+# the latest upstream firmware change. This file has every upstream config
+# change up to it except #428's "Disable physical controls" switch, which
+# Pivot's own button and dial handling would need designing for.
 external_components:
   - source:
       type: git
       url: https://github.com/esphome/home-assistant-voice-pe
-      ref: 0579e7b9d8504264719c593474c85447253c9dc1
+      ref: db8fe1f4c4d22c308430bae556fb5253df958464
     components:
       - voice_kit
     refresh: 0s
@@ -2984,6 +3004,7 @@ micro_wake_word:
 select:
   - platform: template
     name: "Wake word sensitivity"
+    id: wake_word_sensitivity
     optimistic: true
     initial_option: Slightly sensitive
     restore_value: true
@@ -3017,8 +3038,10 @@ select:
 voice_assistant:
   id: va
   microphone:
-    microphone: i2s_mics
-    channels: 0
+    - microphone: i2s_mics
+      channels: 0
+    - microphone: i2s_mics
+      channels: 1
   media_player: external_media_player
   micro_wake_word: mww
   use_wake_word: false
