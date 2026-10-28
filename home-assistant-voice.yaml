@@ -89,7 +89,7 @@ esphome:
   # refuses a tag that does not match it.
   project:
     name: "Made with Merritt.Pivot"
-    version: "0.0.32"
+    version: "0.0.33"
   on_boot:
     # LIST form (a list of automations), not a single mapping. ESPHome merges
     # packages by recursively merging mappings and CONCATENATING lists. In
@@ -1953,6 +1953,8 @@ sensor:
                         - script.execute:
                             id: control_hue
                             increase_hue: true
+          else:
+            - script.execute: reset_dial_after_locked_turn
     on_anticlockwise:
       - if:
           condition:
@@ -1997,6 +1999,8 @@ sensor:
                         - script.execute:
                             id: control_hue
                             increase_hue: false
+          else:
+            - script.execute: reset_dial_after_locked_turn
 
   # Sync per-bank values from Home Assistant
   - platform: homeassistant
@@ -2368,6 +2372,20 @@ script:
           brightness: !lambda return max( id(led_ring).current_values.get_brightness() , 0.2f );
           id: voice_assistant_leds
           effect: "Timer tick"
+
+  # Script executed after a turn while physical controls are disabled. The
+  # encoder still counts locked turns, and nothing else zeroes the count
+  # until the next unlocked turn finishes, so control_hue would read it as
+  # past its dead zone. Zeroed a second later, as the knob scripts below do.
+  # Not done in the turn handler itself: set_value re-enters the encoder's
+  # loop, which is what calls that handler.
+  - id: reset_dial_after_locked_turn
+    mode: restart
+    then:
+      - delay: 1s
+      - sensor.rotary_encoder.set_value:
+          id: dial
+          value: 0
 
   # Script executed when the volume is increased/decreased from the dial
   - id: control_volume
